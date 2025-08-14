@@ -1,3 +1,5 @@
+# ADAPTED FROM
+# https://github.com/NixOS/nixpkgs/blob/nixos-25.05/pkgs/by-name/sk/skia/package.nix
 {
   lib,
   stdenv,
@@ -43,6 +45,27 @@ stdenv.mkDerivation (finalAttrs: {
     # System zlib detection bug workaround
     substituteInPlace BUILD.gn \
       --replace-fail 'deps = [ "//third_party/zlib" ]' 'deps = []'
+
+    # Google Skia's GN configs seem flawed. For example, `libskparagraph.so`
+    # built using the provided GN configs with flag `is_component_build=true`
+    # does not expose all symbols because `-fvisibility=hidden` is
+    # (erroneously?) applied to all shared library GN targets. This is a patch
+    # to fix this issue.
+    patch --verbose -p0 <<EOF
+diff --git gn/skia/BUILD.gn gn/skia/BUILD.gn
+index 8a819a358c..e467433e60 100644
+--- gn/skia/BUILD.gn
++++ gn/skia/BUILD.gn
+@@ -145,7 +145,7 @@ config("default") {
+     cflags += [
+       "-fstrict-aliasing",
+       "-fPIC",
+-      "-fvisibility=hidden",
++      # "-fvisibility=hidden",
+     ]
+     cflags_cc += [
+       "-std=c++17",
+    EOF
   '';
 
   strictDeps = true;
@@ -92,6 +115,11 @@ stdenv.mkDerivation (finalAttrs: {
       # Don't use missing tools
       "skia_use_dng_sdk=false"
       "skia_use_wuffs=false"
+      # Ensure that some Skia modules are always enabled
+      "skia_enable_skparagraph=true"
+      "skia_enable_skshaper=true"
+      "skia_enable_skunicode=true"
+      "skia_enable_skottie=true"
       # Use system dependencies
       "extra_cflags=[\"-I${harfbuzzFull.dev}/include/harfbuzz\"]"
       "cc=\"${stdenv.cc.targetPrefix}cc\""
