@@ -4,8 +4,7 @@ from pathlib import Path
 import logging
 import argparse
 import sys
-import cli_utils.gencode
-import cli_utils.misc
+import cli_utils.gen_bindings
 
 
 def main():
@@ -31,11 +30,11 @@ def main():
     )
     root_findskiainclude.set_defaults(command="find-skia-include")
 
-    root_gencode = root_.add_parser(
-        "gen-code",
+    root_genbindings = root_.add_parser(
+        "gen-bindings",
         description="Generates Haskell FFI definitions from Mono's Skia C API headers."
     )
-    root_gencode.set_defaults(command="gen-code")
+    root_genbindings.set_defaults(command="gen-bindings")
 
     # TODO: what
     args = root.parse_args()
@@ -47,10 +46,10 @@ def main():
         return
 
     if args.command == "find-skia-include":
-        info = cli_utils.misc.get_skia_include_info()
-        print(str(info.include_dir))
-    elif args.command == "gen-code":
-        cli_utils.gencode.gen_code(project_root_dir=args.project_root_dir)
+        info = cli_utils.misc.get_cbits_include_info()
+        print(str(info.skia_include_dir))
+    elif args.command == "gen-bindings":
+        cli_utils.gen_bindings.run(project_root_dir=args.project_root_dir)
     else:
         raise NotImplementedError(
             f"Command '{args.command}' is not implemented")
