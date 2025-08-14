@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-from .misc import (
-    BORING_CLIB_TYPEDEF_NAMES,
-    get_skia_ast,
-    render_ast,
-    capitalize_head,
-    get_skia_include_info,
-)
+from .misc import *
 from dataclasses import dataclass
 from pathlib import Path
 from pycparser import c_ast
 from typing import *
+import multiprocessing.pool
 import io
 import logging
 import pycparser
@@ -18,6 +13,7 @@ import shlex
 import subprocess
 import sys
 import tempfile
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -331,66 +327,26 @@ class HsSourceWriter:
             self.write_line(f"{indent}}}")
 
 
-# A set of functions to be excluded from having their 'foreign import ccall'
-# definitions auto-generated.
-#
-# Some Mono Skia C API functions have struct-type arguments, and Haskell's FFI
-# is incapable of interacting with these functions directly. We must manually
-# define FFI bindings for them instead of relying on the auto-generator.
-FUNCTION_BLOCKLIST = set("""
-gr_direct_context_make_direct3d
-gr_direct_context_make_direct3d_with_options
-gr_direct_context_make_vulkan
-gr_direct_context_make_vulkan_with_options
-sk_canvas_clear_color4f
-sk_canvas_draw_color4f
-sk_manageddrawable_set_procs
-sk_managedtracememorydump_set_procs
-sk_managedwstream_set_procs
-sk_managedstream_set_procs
-""".split())
-
-
-class CSourceVisitor(c_ast.NodeVisitor):
-    def __init__(self, srcwriter: HsSourceWriter):
+class GenCodeVisitor(SkiaCSourceVisitor):
+    def __init__(self, *, srcwriter: HsSourceWriter, typectx: TypeContext, gen_for_types: bool, gen_for_funcs: bool):
         self.srcwriter = srcwriter
-        self.typectx = TypeContext()
+        self.typectx = typectx
+
+        # Generate definitions for types?
+        self.gen_for_types = gen_for_types
+
+        # Generate definitions for functions?
+        self.gen_for_funcs = gen_for_funcs
 
         # We need to track what opaque structs we've encountered. This is
         # because Mono Skia's C API erroneously defines duplicate definitions.
         # We need to skip them.
         self._visited_opaque_structs: Set[str] = set()
 
-    def visit_Typedef(self, node: c_ast.Typedef) -> None:
-        """
-        This function visits all 5 types of Skia C type definitions:
-        - 1. Type aliases, e.g., `typedef uint32_t sk_pmcolor_t;`
-        - 2. Enum types, e.g., `typedef enum { ... } gr_backend_t;`
-        - 3. Struct types, e.g., `typedef struct { ... } gr_gl_framebufferinfo_t;`
-        - 4. Opaque struct types, e.g., `typedef struct gr_d3d_memory_allocator_t gr_d3d_memory_allocator_t;`
-        - 5. Function types, e.g., `typedef VKAPI_ATTR void (VKAPI_CALL *gr_vk_func_ptr)(void);`
-        """
-
-        if node.name in BORING_CLIB_TYPEDEF_NAMES:
+    def handle_typedef_type_alias(self, node: c_ast.Node):
+        if not self.gen_for_types:
             return
 
-        if isinstance(node.type.type, c_ast.IdentifierType):
-            self.handle_typedef_type_alias(node)
-        elif isinstance(node.type.type, c_ast.Enum):
-            self.handle_typedef_enum(node)
-        elif isinstance(node.type.type, c_ast.Struct):
-            struct_ty: c_ast.Struct = node.type.type
-            if struct_ty.decls is None:
-                self.handle_typedef_opaque_struct(node)
-            else:
-                self.handle_typedef_normal_struct(node)
-        elif isinstance(node.type.type, c_ast.FuncDecl):
-            self.handle_typedef_func_type_decl(node)
-        else:
-            raise ValueError(f"Unhandled node", node.name,
-                             type(node.type.type))
-
-    def handle_typedef_type_alias(self, node: c_ast.Node):
         c_def_name = node.name
         hs_def_name = capitalize_head(remove_suffix(c_def_name, "_t"))
 
@@ -411,6 +367,9 @@ type {hs_def_name} = {hs_type}\
 """)
 
     def handle_typedef_enum(self, node: c_ast.Node):
+        if not self.gen_for_types:
+            return
+
         enum_ty: c_ast.Enum = node.type.type
 
         c_def_name = node.name
@@ -460,6 +419,9 @@ pattern {hs_value_name} = (#const {c_value_name})
         ```
         """
 
+        if not self.gen_for_types:
+            return
+
         struct_ty: c_ast.Struct = node.type.type
 
         c_def_name = node.name
@@ -480,6 +442,9 @@ pattern {hs_value_name} = (#const {c_value_name})
         )
 
     def handle_typedef_normal_struct(self, node: c_ast.Node):
+        if not self.gen_for_types:
+            return
+
         struct_ty: c_ast.Struct = node.type.type
 
         c_def_name = node.name
@@ -507,7 +472,8 @@ pattern {hs_value_name} = (#const {c_value_name})
 
         self.srcwriter.write_record_type(
             name=hs_def_name,
-            comment=f"C struct: @\"{c_def_name}\"@\n\n@\n{render_ast(node)}\n@",  # TODO:
+            # TODO:
+            comment=f"C struct: @\"{c_def_name}\"@\n\n@\n{render_ast(node)}\n@",
             fields=fields,
         )
 
@@ -551,6 +517,9 @@ pattern {hs_value_name} = (#const {c_value_name})
                 f"{indent2}(#poke {c_def_name}, {c_field_name}) p' {hs_field_name}")
 
     def handle_typedef_func_type_decl(self, node: c_ast.Node):
+        if not self.gen_for_types:
+            return
+
         decl: c_ast.FuncDecl = node.type.type
 
         c_def_name = node.name
@@ -559,37 +528,22 @@ pattern {hs_value_name} = (#const {c_value_name})
         f = unwrap_c_func_decl(decl)
         hs_fn_type = self.typectx.c_to_hs_io_function_type(f)
 
-        self.srcwriter.write_source(f"""\
+        self.srcwriter.write_source(f"""
 -- | C function pointer type: @{render_ast(node)}@
 type {hs_def_name} = {hs_fn_type}
-""")
 
+-- | Creates a 'FunPtr' of @\"{c_def_name}\"@.
+foreign import ccall \"wrapper\" mkFunPtr'{hs_def_name} :: {hs_def_name} -> IO (FunPtr {hs_def_name})
+""")
         self.typectx.register_type(
             c_def_name=c_def_name, hs_type=f"FunPtr {hs_def_name}")
 
-    def visit_FuncDecl(self, decl: c_ast.FuncDecl) -> None:
-        def extract_fn_name() -> str:
-            # FIXME: c_parser's FuncDecl can bury the function's name under
-            # PtrDecl if the return type is a pointer.
-            #
-            # This is a workaround to extract the function's name.
-            node = decl.type
-            while True:
-                if isinstance(node, c_ast.TypeDecl):
-                    return node.declname
-                elif isinstance(node, c_ast.ArrayDecl):
-                    node = node.type
-                elif isinstance(node, c_ast.PtrDecl):
-                    node = node.type
-                else:
-                    raise ValueError(f"cannot unrecognize FuncDecl: {decl}")
-
-        c_def_name = extract_fn_name()
-        hs_def_name = c_def_name
-
-        # See notes on FUNCTION_BLOCKLIST.
-        if c_def_name in FUNCTION_BLOCKLIST:
+    def handle_func_decl(self, decl: c_ast.FuncDecl) -> None:
+        if not self.gen_for_funcs:
             return
+
+        c_def_name = extract_name_from_func_decl(decl)
+        hs_def_name = c_def_name
 
         f = unwrap_c_func_decl(decl)
 
@@ -630,21 +584,8 @@ foreign import ccall \"&{c_def_name}\" p'{c_def_name} ::
 """)
 
 
-def gen_code(*, project_root_dir: Path) -> None:
-    """
-    Generates Haskell FFI definitions from the Mono's Skia C API headers.
-    """
-    info = get_skia_include_info()
-    ast = get_skia_ast(info)
-
-    module_name = "Skia.Bindings.Internal.AutoGenerated"
-    module_path = project_root_dir / "src" / "Skia" / \
-        "Bindings" / "Internal" / "AutoGenerated.hsc"
-
-    with module_path.open("w") as buffer:
-        srcwriter = HsSourceWriter(buffer)
-
-        extensions: list[str] = """
+def write_common_module_header(srcwriter: HsSourceWriter, module_name: str) -> None:
+    extensions: list[str] = """
 DeriveAnyClass
 DeriveFoldable
 DeriveFunctor
@@ -664,10 +605,13 @@ PatternSynonyms
 ScopedTypeVariables
 """.split()
 
-        for extension in extensions:
-            srcwriter.write_line(f"{{-# LANGUAGE {extension} #-}}")
+    for extension in extensions:
+        srcwriter.write_line(f"{{-# LANGUAGE {extension} #-}}")
 
-        srcwriter.write_source(f"""
+    srcwriter.write_line(f"{{-# OPTIONS_GHC -Wno-unused-imports #-}}")
+
+    srcwriter.write_source(f"""
+-- | This is an auto-generated FFI binding module.
 module {module_name} where
 
 import Foreign
@@ -677,11 +621,116 @@ import Foreign.Storable.Offset
 
 """)
 
-        for path in info.c_headers:
-            srcwriter.write_line(f"#include \"{path}\"")
 
+def run(*, project_root_dir: Path) -> None:
+    """
+    Generates Haskell FFI definitions from the Skia C API headers.
+    """
+    cbits_info = get_cbits_include_info(project_root_dir)
 
-        visitor = CSourceVisitor(srcwriter)
-        visitor.visit(ast)
+    bindings_dir = project_root_dir / "src" / "Skia" / "Bindings"
+    bindings_dir.mkdir(parents=True, exist_ok=True)
 
-    logger.info(f"Wrote generated bindings to '{module_path}'")
+    typectx = TypeContext()
+    module_names_under_bindings: list[str] = []
+
+    # *** Generate sk_types.h first.
+    #
+    # Note that sk_types.h is special - it does not have function definitions;
+    # it only has type declarations, and all other modules import it. This
+    # requires special logic to handle.
+
+    types_module_path = bindings_dir / f"Types.hsc"
+    types_module_name = "Skia.Bindings.Types"
+    module_names_under_bindings.append(types_module_name)
+
+    def generate_sk_types():
+        with types_module_path.open("w") as f:
+            srcwriter = HsSourceWriter(f)
+            write_common_module_header(srcwriter, types_module_name)
+
+            srcwriter.write_line(
+                f"#include \"skia_capi/sk_types.h\"")
+
+            visitor = GenCodeVisitor(
+                srcwriter=srcwriter, typectx=typectx, gen_for_funcs=False, gen_for_types=True)
+            visitor.visit(get_skia_ast_of_header(
+                cbits_info, "skia_capi/sk_types.h"))
+
+            logger.info(f"Generated '{types_module_path}'")
+
+    generate_sk_types()
+
+    # *** After processing sk_types.h, we process other function-defining
+    # headers.
+
+    def generate_for_header_path(header_path: Path):
+        # If header_path is '[...]/gr_context.h', then module_stem is 'Gr_context'
+        module_stem: str = capitalize_head(header_path.stem)
+
+        # N.B.: The extension is ".hs", NOT ".hsc" (as compared to
+        # Skia.Bindings.Types). Function-defining headers do not need hsc2hs
+        # functionalities
+        module_path = bindings_dir / f"{module_stem}.hs"
+
+        module_name = f"Skia.Bindings.{module_stem}"
+        module_names_under_bindings.append(module_name)
+
+        with module_path.open("w") as f:
+            srcwriter = HsSourceWriter(f)
+            write_common_module_header(srcwriter, module_name)
+            srcwriter.write_line(f"import {types_module_name}\n")
+
+            # srcwriter.write_line(
+            #     f"#include \"{header_path.name}\"")
+
+            visitor = GenCodeVisitor(
+                srcwriter=srcwriter, typectx=typectx, gen_for_funcs=True, gen_for_types=False)
+            visitor.visit(get_skia_ast_of_header(cbits_info, header_path))
+
+        logger.info(f"Generated '{module_path}'")
+
+    def generate_other_headers():
+        # Build a list of header paths we will run generate_for_header_path() on.
+        header_paths = []
+        for header_path in (cbits_info.cbits_dir / "skia_capi").glob("*.h"):
+            # Skip sk_types.h. We have already dealt with it.
+            if header_path.name == "sk_types.h":
+                continue
+            header_paths.append(header_path)
+
+        # NOTE: Without using ThreadPool, the codegen speed would be very slow,
+        # so much so that it is almost mandatory to use ThreadPool to enable a
+        # speedy development cycle.
+        #
+        # FIXME: Optimize. Without using ThreadPool, the slowness is likely
+        # caused by the need to parse sk_types.h, which is included by all these
+        # "other headers," from scratch everytime. Could we optimize this?
+        with multiprocessing.pool.ThreadPool(processes=os.cpu_count()) as pool:
+            for _ in pool.imap_unordered(generate_for_header_path, header_paths):
+                pass
+
+    generate_other_headers()
+
+    # *** Write Skia.Bindings - a master module to reexport all modules under
+    # 'Skia/Bindings/'.
+
+    def generate_master_module():
+        master_module_path = bindings_dir.parent / "Bindings.hs"
+        with master_module_path.open("w") as f:
+            srcwriter = HsSourceWriter(f)
+            indent = srcwriter.indent(1)
+
+            srcwriter.write_line("module Skia.Bindings (")
+            for n in module_names_under_bindings:
+                srcwriter.write_line(f"{indent}module {n},")
+            srcwriter.write_line(") where\n")
+
+            for n in module_names_under_bindings:
+                srcwriter.write_line(f"import {n}")
+
+        logger.info(f"Generated '{master_module_path}'")
+
+    generate_master_module()
+
+    logger.info(f"Finished code generation")
