@@ -7,32 +7,12 @@
  * found in the LICENSE file.
  */
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
-#include "include/codec/SkCodec.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkDocument.h"
-#include "include/core/SkImageInfo.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkPoint.h"
-#include "include/core/SkPoint3.h"
-#include "include/core/SkRect.h"
-#include "include/core/SkRSXform.h"
-#include "include/core/SkSize.h"
-#include "include/core/SkSurfaceProps.h"
-#include "include/core/SkTextBlob.h"
-#include "include/docs/SkPDFDocument.h"
-#include "include/effects/SkHighContrastFilter.h"
-#include "include/effects/SkRuntimeEffect.h"
-#include "src/core/SkMask.h"
 
 #if defined(SK_GANESH)
-#include "include/gpu/GrTypes.h"
-#include "include/gpu/GrContextOptions.h"
-#include "include/gpu/gl/GrGLTypes.h"
 
 #if defined(SK_VULKAN)
-#include "include/gpu/vk/GrVkTypes.h"
 #endif
 
 #endif

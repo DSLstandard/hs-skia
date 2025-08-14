@@ -7,11 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkString.h"
 
-#include "include/c/sk_string.h"
+#include "skia_capi/sk_string.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 sk_string_t* sk_string_new_empty(void) {
     return ToString(new SkString());

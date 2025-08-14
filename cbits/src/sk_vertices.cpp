@@ -7,11 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkVertices.h"
 
-#include "include/c/sk_vertices.h"
+#include "skia_capi/sk_vertices.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 void sk_vertices_unref(sk_vertices_t* cvertices) {
     SkSafeUnref(AsVertices(cvertices));

@@ -7,18 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkPathEffect.h"
-#include "include/core/SkPath.h"
-#include "include/effects/SkDiscretePathEffect.h"
-#include "include/effects/SkCornerPathEffect.h"
-#include "include/effects/Sk1DPathEffect.h"
-#include "include/effects/Sk2DPathEffect.h"
-#include "include/effects/SkDashPathEffect.h"
-#include "include/effects/SkTrimPathEffect.h"
 
-#include "include/c/sk_patheffect.h"
+#include "skia_capi/sk_patheffect.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 void sk_path_effect_unref(sk_path_effect_t* effect) {
     SkSafeUnref(AsPathEffect(effect));

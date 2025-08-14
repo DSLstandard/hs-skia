@@ -7,16 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkBitmap.h"
-#include "include/core/SkColor.h"
-#include "include/core/SkColorPriv.h"
-#include "include/core/SkImageInfo.h"
-#include "include/core/SkShader.h"
-#include "include/core/SkUnPreMultiply.h"
 
-#include "include/c/sk_bitmap.h"
+#include "skia_capi/sk_bitmap.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 void sk_bitmap_destructor(sk_bitmap_t* cbitmap) {
     delete AsBitmap(cbitmap);

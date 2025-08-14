@@ -7,11 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkTextBlob.h"
 
-#include "include/c/sk_textblob.h"
+#include "skia_capi/sk_textblob.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 
 void sk_textblob_ref(const sk_textblob_t* blob) {
@@ -59,8 +58,8 @@ void sk_textblob_builder_alloc_run_pos(sk_textblob_builder_t* builder, const sk_
     *runbuffer = ToTextBlobBuilderRunBuffer(AsTextBlobBuilder(builder)->allocRunPos(AsFont(*font), count, AsRect(bounds)));
 }
 
-void sk_textblob_builder_alloc_run_rsxform(sk_textblob_builder_t* builder, const sk_font_t* font, int count, const sk_rect_t* bounds, sk_textblob_builder_runbuffer_t* runbuffer) {
-    *runbuffer = ToTextBlobBuilderRunBuffer(AsTextBlobBuilder(builder)->allocRunRSXform(AsFont(*font), count, AsRect(bounds)));
+void sk_textblob_builder_alloc_run_rsxform(sk_textblob_builder_t* builder, const sk_font_t* font, int count, sk_textblob_builder_runbuffer_t* runbuffer) {
+    *runbuffer = ToTextBlobBuilderRunBuffer(AsTextBlobBuilder(builder)->allocRunRSXform(AsFont(*font), count));
 }
 
 void sk_textblob_builder_alloc_run_text(sk_textblob_builder_t* builder, const sk_font_t* font, int count, float x, float y, int textByteCount, const sk_rect_t* bounds, sk_textblob_builder_runbuffer_t* runbuffer) {

@@ -7,11 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkGraphics.h"
 
-#include "include/c/sk_graphics.h"
+#include "skia_capi/sk_graphics.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 void sk_graphics_init(void) {
     SkGraphics::Init();

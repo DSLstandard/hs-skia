@@ -10,7 +10,7 @@
 #ifndef skresources_resource_provider_DEFINED
 #define skresources_resource_provider_DEFINED
 
-#include "include/c/sk_types.h"
+#include "sk_types.h"
 
 SK_C_PLUS_PLUS_BEGIN_GUARD
 

@@ -7,17 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkBlender.h"
-#include "include/core/SkColorFilter.h"
-#include "include/core/SkMaskFilter.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkPathEffect.h"
-#include "include/core/SkPathUtils.h"
-#include "include/core/SkShader.h"
 
-#include "include/c/sk_paint.h"
+#include "skia_capi/sk_paint.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 sk_paint_t* sk_paint_new(void) {
     return ToPaint(new SkPaint());

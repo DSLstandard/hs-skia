@@ -1,9 +1,6 @@
-#include "modules/skottie/include/Skottie.h"
-#include "modules/skresources/include/SkResources.h"
-#include "modules/sksg/include/SkSGInvalidationController.h"
-#include "include/c/skottie_animation.h"
+#include "skia_capi/skottie_animation.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 /*
  * skottie::Animation

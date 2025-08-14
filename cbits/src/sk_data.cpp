@@ -7,11 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkData.h"
 
-#include "include/c/sk_data.h"
+#include "skia_capi/sk_data.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 sk_data_t* sk_data_new_from_file(const char* path) {
     return ToData(SkData::MakeFromFileName(path).release());

@@ -7,12 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkBlender.h"
-#include "include/effects/SkBlenders.h"
 
-#include "include/c/sk_blender.h"
+#include "skia_capi/sk_blender.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 void sk_blender_ref(sk_blender_t* blender) {
     SkSafeRef(AsBlender(blender));

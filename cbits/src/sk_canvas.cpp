@@ -7,15 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkAnnotation.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkOverdrawCanvas.h"
-#include "include/utils/SkNoDrawCanvas.h"
-#include "include/utils/SkNWayCanvas.h"
 
-#include "include/c/sk_canvas.h"
+#include "skia_capi/sk_canvas.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 void sk_canvas_destroy(sk_canvas_t* ccanvas) {
     delete AsCanvas(ccanvas);
@@ -25,8 +20,8 @@ void sk_canvas_clear(sk_canvas_t* ccanvas, sk_color_t color) {
     AsCanvas(ccanvas)->clear(color);
 }
 
-void sk_canvas_clear_color4f(sk_canvas_t* ccanvas, sk_color4f_t color) {
-    AsCanvas(ccanvas)->clear(AsColor4f(color));
+void sk_canvas_clear_color4f(sk_canvas_t* ccanvas, sk_color4f_t *color) {
+    AsCanvas(ccanvas)->clear(AsColor4f(*color));
 }
 
 void sk_canvas_discard(sk_canvas_t* ccanvas) {
@@ -45,8 +40,8 @@ void sk_canvas_draw_color(sk_canvas_t* ccanvas, sk_color_t color, sk_blendmode_t
     AsCanvas(ccanvas)->drawColor(color, (SkBlendMode)cmode);
 }
 
-void sk_canvas_draw_color4f(sk_canvas_t* ccanvas, sk_color4f_t color, sk_blendmode_t cmode) {
-    AsCanvas(ccanvas)->drawColor(AsColor4f(color), (SkBlendMode)cmode);
+void sk_canvas_draw_color4f(sk_canvas_t* ccanvas, sk_color4f_t *color, sk_blendmode_t cmode) {
+    AsCanvas(ccanvas)->drawColor(AsColor4f(*color), (SkBlendMode)cmode);
 }
 
 void sk_canvas_draw_points(sk_canvas_t* ccanvas, sk_point_mode_t pointMode, size_t count, const sk_point_t points [], const sk_paint_t* cpaint) {

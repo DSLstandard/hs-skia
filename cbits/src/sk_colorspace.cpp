@@ -7,11 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkColorSpace.h"
 
-#include "include/c/sk_colorspace.h"
+#include "skia_capi/sk_colorspace.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 
 // sk_colorspace_t

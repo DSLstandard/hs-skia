@@ -7,15 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkColorFilter.h"
-#include "include/core/SkImageFilter.h"
-#include "include/core/SkPicture.h"
-#include "include/core/SkRegion.h"
-#include "include/effects/SkImageFilters.h"
 
-#include "include/c/sk_imagefilter.h"
+#include "skia_capi/sk_imagefilter.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 
 // sk_imagefilter_t

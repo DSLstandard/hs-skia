@@ -7,29 +7,18 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkCanvas.h"
-#include "include/core/SkData.h"
-#include "include/core/SkImage.h"
-#include "include/core/SkMaskFilter.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkPath.h"
-#include "include/core/SkPictureRecorder.h"
-#include "include/core/SkSurface.h"
-#include "include/gpu/ganesh/SkSurfaceGanesh.h"
 #if SK_METAL
-#include "include/gpu/ganesh/mtl/SkSurfaceMetal.h"
 #endif
 
-#include "include/c/sk_canvas.h"
-#include "include/c/sk_data.h"
-#include "include/c/sk_image.h"
-#include "include/c/sk_paint.h"
-#include "include/c/sk_path.h"
-#include "include/c/sk_picture.h"
-#include "include/c/sk_surface.h"
+#include "skia_capi/sk_canvas.h"
+#include "skia_capi/sk_data.h"
+#include "skia_capi/sk_image.h"
+#include "skia_capi/sk_paint.h"
+#include "skia_capi/sk_path.h"
+#include "skia_capi/sk_picture.h"
+#include "skia_capi/sk_surface.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 // surface
 

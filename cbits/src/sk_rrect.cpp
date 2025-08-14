@@ -7,11 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkRRect.h"
 
-#include "include/c/sk_rrect.h"
+#include "skia_capi/sk_rrect.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 
 sk_rrect_t* sk_rrect_new(void) {

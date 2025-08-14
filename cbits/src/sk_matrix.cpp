@@ -7,13 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkMatrix.h"
-#include "include/core/SkM44.h"
-#include "include/utils/SkCamera.h"
 
-#include "include/c/sk_matrix.h"
+#include "skia_capi/sk_matrix.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 bool sk_matrix_try_invert(sk_matrix_t *matrix, sk_matrix_t *result) {
     SkMatrix m = AsMatrix(matrix);

@@ -8,11 +8,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkRegion.h"
 
-#include "include/c/sk_region.h"
+#include "skia_capi/sk_region.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 
 // sk_region_t

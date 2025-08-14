@@ -7,13 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkFont.h"
-#include "include/core/SkTypeface.h"
-#include "include/utils/SkTextUtils.h"
 
-#include "include/c/sk_font.h"
+#include "skia_capi/sk_font.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 // sk_font_t
 
@@ -145,10 +142,6 @@ void sk_font_measure_text_no_return(const sk_font_t* font, const void* text, siz
     *measuredWidth = sk_font_measure_text(font, text, byteLength, encoding, bounds, paint);
 }
 
-size_t sk_font_break_text(const sk_font_t* font, const void* text, size_t byteLength, sk_text_encoding_t encoding, float maxWidth, float* measuredWidth, const sk_paint_t* paint) {
-    return AsFont(font)->breakText(text, byteLength, (SkTextEncoding)encoding, maxWidth, measuredWidth, AsPaint(paint));
-}
-
 void sk_font_get_widths_bounds(const sk_font_t* font, const uint16_t glyphs[], int count, float widths[], sk_rect_t bounds[], const sk_paint_t* paint) {
     AsFont(font)->getWidthsBounds(glyphs, count, widths, AsRect(bounds), AsPaint(paint));
 }
@@ -190,8 +183,4 @@ float sk_font_get_metrics(const sk_font_t* font, sk_fontmetrics_t* metrics) {
 
 void sk_text_utils_get_path(const void* text, size_t length, sk_text_encoding_t encoding, float x, float y, const sk_font_t* font, sk_path_t* path) {
     SkTextUtils::GetPath(text, length, (SkTextEncoding)encoding, x, y, *AsFont(font), AsPath(path));
-}
-
-void sk_text_utils_get_pos_path(const void* text, size_t length, sk_text_encoding_t encoding, const sk_point_t pos[], const sk_font_t* font, sk_path_t* path) {
-    SkTextUtils::GetPosPath(text, length, (SkTextEncoding)encoding, AsPoint(pos), *AsFont(font), AsPath(path));
 }

@@ -5,15 +5,11 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkTypes.h"
-#include "include/core/SkColorFilter.h"
-#include "include/core/SkShader.h"
-#include "include/effects/SkRuntimeEffect.h"
 
-#include "include/c/sk_types.h"
-#include "include/c/sk_runtimeeffect.h"
+#include "skia_capi/sk_types.h"
+#include "skia_capi/sk_runtimeeffect.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 sk_runtimeeffect_t* sk_runtimeeffect_make_for_color_filter(sk_string_t* sksl, sk_string_t* error) {
     auto [effect, errorMessage] = SkRuntimeEffect::MakeForColorFilter(AsString(*sksl));

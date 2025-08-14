@@ -10,7 +10,7 @@
 #ifndef sk_svg_DEFINED
 #define sk_svg_DEFINED
 
-#include "include/c/sk_types.h"
+#include "sk_types.h"
 
 SK_C_PLUS_PLUS_BEGIN_GUARD
 

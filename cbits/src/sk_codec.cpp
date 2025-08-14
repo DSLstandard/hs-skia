@@ -7,12 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkStream.h"
-#include "include/codec/SkCodec.h"
 
-#include "include/c/sk_codec.h"
+#include "skia_capi/sk_codec.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 size_t sk_codec_min_buffered_bytes_needed(void) {
     return SkCodec::MinBufferedBytesNeeded();

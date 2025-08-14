@@ -7,16 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkBitmap.h"
-#include "include/core/SkColorFilter.h"
-#include "include/core/SkPicture.h"
-#include "include/core/SkShader.h"
-#include "include/effects/SkGradientShader.h"
-#include "include/effects/SkPerlinNoiseShader.h"
 
-#include "include/c/sk_shader.h"
+#include "skia_capi/sk_shader.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 // SkShader
 

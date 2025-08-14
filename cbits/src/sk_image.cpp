@@ -7,13 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkImage.h"
-#include "include/gpu/ganesh/SkImageGanesh.h"
-#include "include/core/SkPicture.h"
 
-#include "include/c/sk_image.h"
+#include "skia_capi/sk_image.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 void sk_image_ref(const sk_image_t* cimage) {
     AsImage(cimage)->ref();
@@ -148,7 +145,7 @@ sk_image_t* sk_image_make_subset(const sk_image_t* cimage, gr_direct_context_t* 
 }
 
 sk_image_t* sk_image_make_texture_image(const sk_image_t* cimage, gr_direct_context_t* context, bool mipmapped, bool budgeted) {
-    return ToImage(SkImages::TextureFromImage(AsGrDirectContext(context), AsImage(cimage), (GrMipMapped)mipmapped, (skgpu::Budgeted)budgeted).release());
+    return ToImage(SkImages::TextureFromImage(AsGrDirectContext(context), AsImage(cimage), (skgpu::Mipmapped) mipmapped, (skgpu::Budgeted)budgeted).release());
 }
 
 sk_image_t* sk_image_make_non_texture_image(const sk_image_t* cimage) {

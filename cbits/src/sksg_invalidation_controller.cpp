@@ -1,10 +1,6 @@
-#include "modules/skottie/include/Skottie.h"
-#include "modules/skresources/include/SkResources.h"
-#include "modules/sksg/include/SkSGInvalidationController.h"
-#include "include/c/skottie_animation.h"
-#include "include/c/sksg_invalidation_controller.h"
+#include "skia_capi/sksg_invalidation_controller.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 sksg_invalidation_controller_t* sksg_invalidation_controller_new(void) {
     return ToSksgInvalidationController(new sksg::InvalidationController());

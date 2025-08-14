@@ -7,14 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkColorFilter.h"
-#include "include/effects/SkColorMatrixFilter.h"
-#include "include/effects/SkHighContrastFilter.h"
-#include "include/effects/SkLumaColorFilter.h"
 
-#include "include/c/sk_colorfilter.h"
+#include "skia_capi/sk_colorfilter.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 void sk_colorfilter_unref(sk_colorfilter_t* filter) {
     SkSafeUnref(AsColorFilter(filter));

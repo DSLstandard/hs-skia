@@ -7,42 +7,20 @@
  * found in the LICENSE file.
  */
 
-#include "src/c/sk_types_priv.h"
-
-#include "include/codec/SkEncodedImageFormat.h"
-#include "include/codec/SkCodecAnimation.h"
-#include "include/core/SkBitmap.h"
-#include "include/core/SkClipOp.h"
-#include "include/core/SkColorSpace.h"
-#include "include/core/SkImage.h"
-#include "include/core/SkM44.h"
-#include "include/core/SkPathMeasure.h"
-#include "include/core/SkRegion.h"
-#include "include/core/SkRRect.h"
-#include "include/core/SkShader.h"
-#include "include/core/SkSurface.h"
-#include "include/core/SkTypeface.h"
-#include "include/core/SkTileMode.h"
-#include "include/core/SkVertices.h"
-#include "include/effects/Sk1DPathEffect.h"
-#include "include/effects/SkBlurMaskFilter.h"
-#include "include/effects/SkHighContrastFilter.h"
-#include "include/effects/SkTrimPathEffect.h"
-#include "include/encode/SkJpegEncoder.h"
-#include "include/encode/SkPngEncoder.h"
-#include "include/encode/SkWebpEncoder.h"
-#include "include/pathops/SkPathOps.h"
-#include "include/utils/SkTextUtils.h"
+#include "common_include_pch.hpp"
+#include "modules/skparagraph/include/TextStyle.h"
+#include "skia_capi/sk_types.h"
 
 #if defined(SK_GANESH)
-#include "include/gpu/GpuTypes.h"
-#include "include/gpu/GrTypes.h"
-#include "include/gpu/GrContextOptions.h"
 #endif
 
 #if __cplusplus >= 199711L
 
-#define ASSERT_MSG(SK, C) "ABI changed, you must write a enumeration mapper for " SK_TO_STRING(#SK) " to " SK_TO_STRING(#C) "."
+#define ASSERT_MSG(SK, C)                                                    \
+    "ABI changed, you must write a enumeration mapper for " SK_TO_STRING(#SK \
+    ) " to " SK_TO_STRING(#C) "."
+
+/* clang-format off */
 
 // sk_font_style_slant_t
 static_assert ((int)SkFontStyle::Slant::kUpright_Slant   == (int)UPRIGHT_SK_FONT_STYLE_SLANT,   ASSERT_MSG(SkFontStyle::Slant, sk_font_style_slant_t));
@@ -415,5 +393,76 @@ static_assert ((int)GrBackendApi::kDirect3D      == (int)DIRECT3D_GR_BACKEND,   
 static_assert ((int)GrBackendApi::kUnsupported   == (int)UNSUPPORTED_GR_BACKEND,   ASSERT_MSG(GrBackendApi, gr_backend_t));
 
 #endif
+
+/*
+ * SKParagraph enums
+ */
+
+static_assert ((int)skia::textlayout::Affinity::kUpstream   == (int)UPSTREAM_SKPARAGRAPH_AFFINITY,   ASSERT_MSG(skia::textlayout::Affinity, skparagraph_affinity_t));
+static_assert ((int)skia::textlayout::Affinity::kDownstream == (int)DOWNSTREAM_SKPARAGRAPH_AFFINITY, ASSERT_MSG(skia::textlayout::Affinity, skparagraph_affinity_t));
+
+static_assert ((int)skia::textlayout::RectHeightStyle::kTight                   == (int)TIGHT_SKPARAGRAPH_RECT_HEIGHT_STYLE,                   ASSERT_MSG(skia::textlayout::RectHeightStyle, skparagraph_rect_height_style_t));
+static_assert ((int)skia::textlayout::RectHeightStyle::kMax                     == (int)MAX_SKPARAGRAPH_RECT_HEIGHT_STYLE,                     ASSERT_MSG(skia::textlayout::RectHeightStyle, skparagraph_rect_height_style_t));
+static_assert ((int)skia::textlayout::RectHeightStyle::kIncludeLineSpacingMiddle == (int)INCLUDE_LINE_SPACING_MIDDLE_SKPARAGRAPH_RECT_HEIGHT_STYLE, ASSERT_MSG(skia::textlayout::RectHeightStyle, skparagraph_rect_height_style_t));
+static_assert ((int)skia::textlayout::RectHeightStyle::kIncludeLineSpacingTop   == (int)INCLUDE_LINE_SPACING_TOP_SKPARAGRAPH_RECT_HEIGHT_STYLE,   ASSERT_MSG(skia::textlayout::RectHeightStyle, skparagraph_rect_height_style_t));
+static_assert ((int)skia::textlayout::RectHeightStyle::kIncludeLineSpacingBottom == (int)INCLUDE_LINE_SPACING_BOTTOM_SKPARAGRAPH_RECT_HEIGHT_STYLE, ASSERT_MSG(skia::textlayout::RectHeightStyle, skparagraph_rect_height_style_t));
+static_assert ((int)skia::textlayout::RectHeightStyle::kStrut                   == (int)STRUT_SKPARAGRAPH_RECT_HEIGHT_STYLE,                   ASSERT_MSG(skia::textlayout::RectHeightStyle, skparagraph_rect_height_style_t));
+
+static_assert ((int)skia::textlayout::RectWidthStyle::kTight == (int)TIGHT_SKPARAGRAPH_RECT_WIDTH_STYLE, ASSERT_MSG(skia::textlayout::RectWidthStyle, skparagraph_rect_width_style_t));
+static_assert ((int)skia::textlayout::RectWidthStyle::kMax   == (int)MAX_SKPARAGRAPH_RECT_WIDTH_STYLE,   ASSERT_MSG(skia::textlayout::RectWidthStyle, skparagraph_rect_width_style_t));
+
+static_assert ((int)skia::textlayout::TextAlign::kLeft    == (int)LEFT_SKPARAGRAPH_TEXT_ALIGN,    ASSERT_MSG(skia::textlayout::TextAlign, skparagraph_text_align_t));
+static_assert ((int)skia::textlayout::TextAlign::kRight   == (int)RIGHT_SKPARAGRAPH_TEXT_ALIGN,   ASSERT_MSG(skia::textlayout::TextAlign, skparagraph_text_align_t));
+static_assert ((int)skia::textlayout::TextAlign::kCenter  == (int)CENTER_SKPARAGRAPH_TEXT_ALIGN,  ASSERT_MSG(skia::textlayout::TextAlign, skparagraph_text_align_t));
+static_assert ((int)skia::textlayout::TextAlign::kJustify == (int)JUSTIFY_SKPARAGRAPH_TEXT_ALIGN, ASSERT_MSG(skia::textlayout::TextAlign, skparagraph_text_align_t));
+static_assert ((int)skia::textlayout::TextAlign::kStart   == (int)START_SKPARAGRAPH_TEXT_ALIGN,   ASSERT_MSG(skia::textlayout::TextAlign, skparagraph_text_align_t));
+static_assert ((int)skia::textlayout::TextAlign::kEnd     == (int)END_SKPARAGRAPH_TEXT_ALIGN,     ASSERT_MSG(skia::textlayout::TextAlign, skparagraph_text_align_t));
+
+static_assert ((int)skia::textlayout::TextDirection::kRtl == (int)RTL_SKPARAGRAPH_TEXT_DIRECTION, ASSERT_MSG(skia::textlayout::TextDirection, skparagraph_text_direction_t));
+static_assert ((int)skia::textlayout::TextDirection::kLtr == (int)LTR_SKPARAGRAPH_TEXT_DIRECTION, ASSERT_MSG(skia::textlayout::TextDirection, skparagraph_text_direction_t));
+
+static_assert ((int)skia::textlayout::TextBaseline::kAlphabetic == (int)ALPHABETIC_SKPARAGRAPH_TEXT_BASELINE, ASSERT_MSG(skia::textlayout::TextBaseline, skparagraph_text_baseline_t));
+static_assert ((int)skia::textlayout::TextBaseline::kIdeographic == (int)IDEOGRAPHIC_SKPARAGRAPH_TEXT_BASELINE, ASSERT_MSG(skia::textlayout::TextBaseline, skparagraph_text_baseline_t));
+
+static_assert ((int)skia::textlayout::TextHeightBehavior::kAll             == (int)ALL_SKPARAGRAPH_TEXT_HEIGHT_BEHAVIOR,             ASSERT_MSG(skia::textlayout::TextHeightBehavior, skparagraph_text_height_behavior_t));
+static_assert ((int)skia::textlayout::TextHeightBehavior::kDisableFirstAscent == (int)DISABLE_FIRST_ASCENT_SKPARAGRAPH_TEXT_HEIGHT_BEHAVIOR, ASSERT_MSG(skia::textlayout::TextHeightBehavior, skparagraph_text_height_behavior_t));
+static_assert ((int)skia::textlayout::TextHeightBehavior::kDisableLastDescent == (int)DISABLE_LAST_DESCENT_SKPARAGRAPH_TEXT_HEIGHT_BEHAVIOR, ASSERT_MSG(skia::textlayout::TextHeightBehavior, skparagraph_text_height_behavior_t));
+static_assert ((int)skia::textlayout::TextHeightBehavior::kDisableAll     == (int)DISABLE_ALL_SKPARAGRAPH_TEXT_HEIGHT_BEHAVIOR,     ASSERT_MSG(skia::textlayout::TextHeightBehavior, skparagraph_text_height_behavior_t));
+
+static_assert ((int)skia::textlayout::LineMetricStyle::Typographic == (int)TYPOGRAPHIC_SKPARAGRAPH_LINE_METRIC_STYLE, ASSERT_MSG(skia::textlayout::LineMetricStyle, skparagraph_line_metric_style_t));
+static_assert ((int)skia::textlayout::LineMetricStyle::CSS         == (int)CSS_SKPARAGRAPH_LINE_METRIC_STYLE,        ASSERT_MSG(skia::textlayout::LineMetricStyle, skparagraph_line_metric_style_t));
+
+static_assert ((int)skia::textlayout::TextDecoration::kNoDecoration == (int)NO_DECORATION_SKPARAGRAPH_TEXT_DECORATION_FLAGS,  ASSERT_MSG(skia::textlayout::TextDecoration, skparagraph_text_decoration_flags_t));
+static_assert ((int)skia::textlayout::TextDecoration::kUnderline == (int)UNDERLINE_SKPARAGRAPH_TEXT_DECORATION_FLAGS,  ASSERT_MSG(skia::textlayout::TextDecoration, skparagraph_text_decoration_flags_t));
+static_assert ((int)skia::textlayout::TextDecoration::kOverline == (int)OVERLINE_SKPARAGRAPH_TEXT_DECORATION_FLAGS,  ASSERT_MSG(skia::textlayout::TextDecoration, skparagraph_text_decoration_flags_t));
+static_assert ((int)skia::textlayout::TextDecoration::kLineThrough == (int)LINETHROUGH_SKPARAGRAPH_TEXT_DECORATION_FLAGS,  ASSERT_MSG(skia::textlayout::TextDecoration, skparagraph_text_decoration_flags_t));
+
+static_assert ((int)skia::textlayout::TextDecorationStyle::kSolid == (int)SOLID_SKPARAGRAPH_TEXT_DECORATION_STYLE,  ASSERT_MSG(skia::textlayout::TextDecorationStyle, skparagraph_text_decoration_style_t));
+static_assert ((int)skia::textlayout::TextDecorationStyle::kDouble == (int)DOUBLE_SKPARAGRAPH_TEXT_DECORATION_STYLE,  ASSERT_MSG(skia::textlayout::TextDecorationStyle, skparagraph_text_decoration_style_t));
+static_assert ((int)skia::textlayout::TextDecorationStyle::kDotted == (int)DOTTED_SKPARAGRAPH_TEXT_DECORATION_STYLE,  ASSERT_MSG(skia::textlayout::TextDecorationStyle, skparagraph_text_decoration_style_t));
+static_assert ((int)skia::textlayout::TextDecorationStyle::kDashed == (int)DASHED_SKPARAGRAPH_TEXT_DECORATION_STYLE,  ASSERT_MSG(skia::textlayout::TextDecorationStyle, skparagraph_text_decoration_style_t));
+static_assert ((int)skia::textlayout::TextDecorationStyle::kWavy == (int)WAVY_SKPARAGRAPH_TEXT_DECORATION_STYLE,  ASSERT_MSG(skia::textlayout::TextDecorationStyle, skparagraph_text_decoration_style_t));
+
+static_assert ((int)skia::textlayout::TextDecorationMode::kGaps == (int)GAPS_SKPARAGRAPH_TEXT_DECORATION_MODE,  ASSERT_MSG(skia::textlayout::TextDecorationMode, skparagraph_text_decoration_mode_t));
+static_assert ((int)skia::textlayout::TextDecorationMode::kThrough == (int)THROUGH_SKPARAGRAPH_TEXT_DECORATION_MODE,  ASSERT_MSG(skia::textlayout::TextDecorationMode, skparagraph_text_decoration_mode_t));
+
+static_assert ((int)skia::textlayout::StyleType::kNone == (int)NONE_SKPARAGRAPH_STYLE_TYPE,  ASSERT_MSG(skia::textlayout::StyleType, skparagraph_style_type_t));
+static_assert ((int)skia::textlayout::StyleType::kAllAttributes == (int)ALL_ATTRIBUTES_SKPARAGRAPH_STYLE_TYPE,  ASSERT_MSG(skia::textlayout::StyleType, skparagraph_style_type_t));
+static_assert ((int)skia::textlayout::StyleType::kFont == (int)FONT_SKPARAGRAPH_STYLE_TYPE,  ASSERT_MSG(skia::textlayout::StyleType, skparagraph_style_type_t));
+static_assert ((int)skia::textlayout::StyleType::kForeground == (int)FOREGROUND_SKPARAGRAPH_STYLE_TYPE,  ASSERT_MSG(skia::textlayout::StyleType, skparagraph_style_type_t));
+static_assert ((int)skia::textlayout::StyleType::kBackground == (int)BACKGROUND_SKPARAGRAPH_STYLE_TYPE,  ASSERT_MSG(skia::textlayout::StyleType, skparagraph_style_type_t));
+static_assert ((int)skia::textlayout::StyleType::kShadow == (int)SHADOW_SKPARAGRAPH_STYLE_TYPE,  ASSERT_MSG(skia::textlayout::StyleType, skparagraph_style_type_t));
+static_assert ((int)skia::textlayout::StyleType::kDecorations == (int)DECORATIONS_SKPARAGRAPH_STYLE_TYPE,  ASSERT_MSG(skia::textlayout::StyleType, skparagraph_style_type_t));
+static_assert ((int)skia::textlayout::StyleType::kLetterSpacing == (int)LETTER_SPACING_SKPARAGRAPH_STYLE_TYPE,  ASSERT_MSG(skia::textlayout::StyleType, skparagraph_style_type_t));
+static_assert ((int)skia::textlayout::StyleType::kWordSpacing == (int)WORD_SPACING_SKPARAGRAPH_STYLE_TYPE,  ASSERT_MSG(skia::textlayout::StyleType, skparagraph_style_type_t));
+
+static_assert ((int)skia::textlayout::PlaceholderAlignment::kBaseline == (int)BASELINE_SKPARAGRAPH_PLACEHOLDER_ALIGNMENT,  ASSERT_MSG(skia::textlayout::PlaceholderAlignment, skparagraph_placeholder_alignment_t));
+static_assert ((int)skia::textlayout::PlaceholderAlignment::kAboveBaseline == (int)ABOVE_BASELINE_SKPARAGRAPH_PLACEHOLDER_ALIGNMENT,  ASSERT_MSG(skia::textlayout::PlaceholderAlignment, skparagraph_placeholder_alignment_t));
+static_assert ((int)skia::textlayout::PlaceholderAlignment::kBelowBaseline == (int)BELOW_BASELINE_SKPARAGRAPH_PLACEHOLDER_ALIGNMENT,  ASSERT_MSG(skia::textlayout::PlaceholderAlignment, skparagraph_placeholder_alignment_t));
+static_assert ((int)skia::textlayout::PlaceholderAlignment::kTop == (int)TOP_SKPARAGRAPH_PLACEHOLDER_ALIGNMENT,  ASSERT_MSG(skia::textlayout::PlaceholderAlignment, skparagraph_placeholder_alignment_t));
+static_assert ((int)skia::textlayout::PlaceholderAlignment::kBottom == (int)BOTTOM_SKPARAGRAPH_PLACEHOLDER_ALIGNMENT,  ASSERT_MSG(skia::textlayout::PlaceholderAlignment, skparagraph_placeholder_alignment_t));
+static_assert ((int)skia::textlayout::PlaceholderAlignment::kMiddle == (int)MIDDLE_SKPARAGRAPH_PLACEHOLDER_ALIGNMENT,  ASSERT_MSG(skia::textlayout::PlaceholderAlignment, skparagraph_placeholder_alignment_t));
+
+/* clang-format on */
 
 #endif

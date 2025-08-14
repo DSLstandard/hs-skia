@@ -7,11 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkStream.h"
 
-#include "include/c/sk_stream.h"
+#include "skia_capi/sk_stream.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 
 // stream asset base

@@ -8,7 +8,7 @@
 #ifndef sk_runtimeeffect_DEFINED
 #define sk_runtimeeffect_DEFINED
 
-#include "include/c/sk_types.h"
+#include "sk_types.h"
 
 SK_C_PLUS_PLUS_BEGIN_GUARD
 

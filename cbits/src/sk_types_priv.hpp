@@ -10,9 +10,9 @@
 #ifndef sk_types_priv_DEFINED
 #define sk_types_priv_DEFINED
 
-#include "include/c/sk_types.h"
+#include "skia_capi/sk_types.h"
 
-#include "include/core/SkTypes.h" // required to make sure SK_GANESH is defined
+#include "core/SkTypes.h" // required to make sure SK_GANESH is defined
 
 #define SK_SKIP_ARG__(keep, skip, ...) skip
 #define SK_SKIP_ARG_(args) SK_SKIP_ARG__ args
@@ -23,15 +23,15 @@
 #define SK_FIRST_ARG(...) SK_FIRST_ARG_((__VA_ARGS__, ))
 
 #if defined(SK_GANESH)
-#    include "include/gpu/GrDirectContext.h"
-#    include "include/gpu/GrBackendSurface.h"
-#    include "include/gpu/gl/GrGLInterface.h"
-#    include "include/gpu/gl/GrGLAssembleInterface.h"
+#    include "gpu/GrDirectContext.h"
+#    include "gpu/GrBackendSurface.h"
+#    include "gpu/gl/GrGLInterface.h"
+#    include "gpu/gl/GrGLAssembleInterface.h"
 #    define SK_ONLY_GPU(...) SK_FIRST_ARG(__VA_ARGS__)
 #    if SK_VULKAN
-#        include "include/gpu/vk/GrVkTypes.h"
-#        include "include/gpu/vk/GrVkBackendContext.h"
-#        include "include/gpu/vk/VulkanExtensions.h"
+#        include "gpu/vk/GrVkTypes.h"
+#        include "gpu/vk/GrVkBackendContext.h"
+#        include "gpu/vk/VulkanExtensions.h"
 #        define SK_ONLY_VULKAN(...) SK_FIRST_ARG(__VA_ARGS__)
 #    else
 #        define SK_ONLY_VULKAN(...) SK_SKIP_ARG(__VA_ARGS__)
@@ -42,8 +42,8 @@
 #        define SK_ONLY_METAL(...) SK_SKIP_ARG(__VA_ARGS__)
 #    endif
 #    if SK_DIRECT3D
-#        include "include/gpu/d3d/GrD3DBackendContext.h"
-#        include "include/gpu/d3d/GrD3DTypes.h"
+#        include "gpu/d3d/GrD3DBackendContext.h"
+#        include "gpu/d3d/GrD3DTypes.h"
 #        define SK_ONLY_DIRECT3D(...) SK_FIRST_ARG(__VA_ARGS__)
 #    else
 #        define SK_ONLY_DIRECT3D(...) SK_SKIP_ARG(__VA_ARGS__)
@@ -123,6 +123,10 @@ DEF_CLASS_MAP(SkFont, sk_font_t, Font)
 DEF_CLASS_MAP(SkFontMgr, sk_fontmgr_t, FontMgr)
 DEF_CLASS_MAP(SkFontStyle, sk_fontstyle_t, FontStyle)
 DEF_CLASS_MAP(SkFontStyleSet, sk_fontstyleset_t, FontStyleSet)
+
+#include "core/SkFontArguments.h"
+DEF_CLASS_MAP(SkFontArguments, sk_fontarguments_t, FontArguments)
+
 DEF_CLASS_MAP(SkImage, sk_image_t, Image)
 DEF_CLASS_MAP(SkImageFilter, sk_imagefilter_t, ImageFilter)
 DEF_CLASS_MAP(SkMaskFilter, sk_maskfilter_t, MaskFilter)
@@ -188,11 +192,11 @@ DEF_STRUCT_MAP(GrVkImageInfo, gr_vk_imageinfo_t, GrVkImageInfo)
 DEF_STRUCT_MAP(GrD3DBackendContext, gr_d3d_backendcontext_t, GrD3DBackendContext)
 DEF_STRUCT_MAP(GrD3DTextureResourceInfo, gr_d3d_textureresourceinfo_t, GrD3DTextureResourceInfo)
 
-#include "include/effects/SkRuntimeEffect.h"
+#include "effects/SkRuntimeEffect.h"
 DEF_MAP(SkRuntimeEffect::Uniform, sk_runtimeeffect_uniform_t, RuntimeEffectUniform)
 DEF_MAP(SkRuntimeEffect::Child, sk_runtimeeffect_child_t, RuntimeEffectChild)
 
-#include "include/core/SkCanvas.h"
+#include "core/SkCanvas.h"
 DEF_MAP(SkCanvas::Lattice, sk_lattice_t, Lattice)
 
 static inline SkCanvas::SaveLayerRec AsCanvasSaveLayerRec(const sk_canvas_savelayerrec_t* rec) {
@@ -203,35 +207,35 @@ static inline SkCanvas::SaveLayerRec AsCanvasSaveLayerRec(const sk_canvas_savela
         (SkCanvas::SaveLayerFlags)rec->fFlags);
 }
 
-#include "include/codec/SkCodec.h"
+#include "codec/SkCodec.h"
 DEF_MAP(SkCodec::FrameInfo, sk_codec_frameinfo_t, FrameInfo)
 DEF_MAP(SkCodec::Options, sk_codec_options_t, CodecOptions)
 
-#include "include/core/SkColor.h"
+#include "core/SkColor.h"
 DEF_MAP(SkColor4f, sk_color4f_t, Color4f)
 
-#include "include/encode/SkJpegEncoder.h"
+#include "encode/SkJpegEncoder.h"
 DEF_MAP(SkJpegEncoder::Options, sk_jpegencoder_options_t, JpegEncoderOptions)
 
-#include "include/core/SkFontMetrics.h"
+#include "core/SkFontMetrics.h"
 DEF_MAP(SkFontMetrics, sk_fontmetrics_t, FontMetrics)
 
-#include "include/core/SkPath.h"
+#include "core/SkPath.h"
 DEF_MAP(SkPath::Iter, sk_path_iterator_t, PathIter)
 DEF_MAP(SkPath::RawIter, sk_path_rawiterator_t, PathRawIter)
 
-#include "include/encode/SkPngEncoder.h"
+#include "encode/SkPngEncoder.h"
 DEF_MAP(SkPngEncoder::Options, sk_pngencoder_options_t, PngEncoderOptions)
 
-#include "include/core/SkRegion.h"
+#include "core/SkRegion.h"
 DEF_MAP(SkRegion::Iterator, sk_region_iterator_t, RegionIterator)
 DEF_MAP(SkRegion::Cliperator, sk_region_cliperator_t, RegionCliperator)
 DEF_MAP(SkRegion::Spanerator, sk_region_spanerator_t, RegionSpanerator)
 
-#include "include/encode/SkWebpEncoder.h"
+#include "encode/SkWebpEncoder.h"
 DEF_MAP(SkWebpEncoder::Options, sk_webpencoder_options_t, WebpEncoderOptions)
 
-#include "include/core/SkMatrix.h"
+#include "core/SkMatrix.h"
 static inline SkMatrix AsMatrix(const sk_matrix_t* matrix) {
     return SkMatrix::MakeAll(
         matrix->scaleX, matrix->skewX,  matrix->transX,
@@ -265,7 +269,7 @@ static inline sk_matrix_t ToMatrix(const SkMatrix& matrix) {
     return m;
 }
 
-#include "include/core/SkImageInfo.h"
+#include "core/SkImageInfo.h"
 static inline SkImageInfo AsImageInfo(const sk_imageinfo_t* info) {
     return SkImageInfo::Make(
         info->width,
@@ -290,7 +294,7 @@ static inline sk_imageinfo_t* AsImageInfo(SkImageInfo* info) {
     return reinterpret_cast<sk_imageinfo_t*>(info);
 }
 
-#include "include/core/SkTextBlob.h"
+#include "core/SkTextBlob.h"
 static inline SkTextBlobBuilder::RunBuffer AsTextBlobBuilderRunBuffer(const sk_textblob_builder_runbuffer_t* runbuffer) {
     return {
         (SkGlyphID*)runbuffer->glyphs,
@@ -308,7 +312,7 @@ static inline sk_textblob_builder_runbuffer_t ToTextBlobBuilderRunBuffer(const S
     };
 }
 
-#include "include/docs/SkPDFDocument.h"
+#include "docs/SkPDFDocument.h"
 DEF_MAP(SkPDF::DateTime, sk_document_pdf_datetime_t, TimeDateTime)
 static inline SkPDF::DateTime AsDocumentOptionalTimestamp(const sk_document_pdf_datetime_t* datetime) {
     if (datetime) {
@@ -439,5 +443,53 @@ DEF_MAP(GrD3DMemoryAllocator, gr_d3d_memory_allocator_t, GrD3DMemoryAllocator);
 #endif  //SK_DIRECT3D
 
 #endif // SK_GANESH
+
+/*
+ * skparagraph
+ */
+
+#include "modules/skparagraph/include/Metrics.h"
+#include "modules/skparagraph/include/TextShadow.h"
+#include "modules/skparagraph/include/TypefaceFontProvider.h"
+#include "modules/skparagraph/include/DartTypes.h"
+#include "modules/skparagraph/include/Paragraph.h"
+#include "modules/skparagraph/include/ParagraphStyle.h"
+#include "modules/skparagraph/include/FontArguments.h"
+#include "modules/skparagraph/include/ParagraphBuilder.h"
+#include "modules/skparagraph/include/ParagraphCache.h"
+#include "modules/skparagraph/include/ParagraphPainter.h"
+#include "modules/skparagraph/include/TextStyle.h"
+#include "modules/skparagraph/include/FontCollection.h"
+#include "modules/skparagraph/src/Decorations.h"
+#include "modules/skparagraph/src/TextLine.h"
+#include "modules/skparagraph/src/Iterators.h"
+#include "modules/skparagraph/src/ParagraphPainterImpl.h"
+#include "modules/skparagraph/src/TextWrapper.h"
+#include "modules/skparagraph/src/ParagraphImpl.h"
+#include "modules/skparagraph/src/Run.h"
+#include "modules/skparagraph/src/OneLineShaper.h"
+#include "modules/skparagraph/src/ParagraphBuilderImpl.h"
+
+DEF_MAP(skia::textlayout::TextStyle, skparagraph_text_style_t, SkParagraphTextStyle);
+DEF_MAP(skia::textlayout::StrutStyle, skparagraph_strut_style_t, SkParagraphStrutStyle);
+DEF_MAP(skia::textlayout::ParagraphStyle, skparagraph_paragraph_style_t, SkParagraphStyle);
+
+DEF_MAP(skia::textlayout::FontCollection, skparagraph_font_collection_t, SkParagraphFontCollection);
+
+DEF_MAP(skia::textlayout::FontArguments, skparagraph_font_arguments_t, SkParagraphFontArguments);
+
+DEF_MAP(skia::textlayout::Paragraph, skparagraph_paragraph_t, SkParagraph);
+
+DEF_MAP(skia::textlayout::ParagraphBuilder, skparagraph_paragraph_builder_t, SkParagraphBuilder);
+DEF_MAP(skia::textlayout::ParagraphBuilderImpl, skparagraph_paragraph_builder_impl_t, SkParagraphBuilderImpl);
+
+DEF_MAP(skia::textlayout::ParagraphPainter, skparagraph_paragraph_painter_t, SkParagraphPainter);
+DEF_MAP(skia::textlayout::CanvasParagraphPainter, skparagraph_canvas_paragraph_painter_t, SkCanvasParagraphPainter);
+
+/*
+ * skunicode
+ */
+
+DEF_CLASS_MAP(SkUnicode, skunicode_skunicode_t, SkUnicode);
 
 #endif

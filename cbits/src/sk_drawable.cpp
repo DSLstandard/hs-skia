@@ -6,12 +6,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkDrawable.h"
-#include "include/core/SkPicture.h"
 
-#include "include/c/sk_drawable.h"
-#include "include/c/sk_picture.h"
-#include "src/c/sk_types_priv.h"
+#include "skia_capi/sk_drawable.h"
+#include "skia_capi/sk_picture.h"
+#include "common_include_pch.hpp"
 
 
 void sk_drawable_unref(sk_drawable_t* drawable)

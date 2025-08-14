@@ -10,7 +10,7 @@
 #ifndef gr_context_DEFINED
 #define gr_context_DEFINED
 
-#include "include/c/sk_types.h"
+#include "sk_types.h"
 
 SK_C_PLUS_PLUS_BEGIN_GUARD
 
@@ -28,12 +28,12 @@ SK_C_API gr_direct_context_t* gr_recording_context_get_direct_context(gr_recordi
 
 SK_C_API gr_direct_context_t* gr_direct_context_make_gl(const gr_glinterface_t* glInterface);
 SK_C_API gr_direct_context_t* gr_direct_context_make_gl_with_options(const gr_glinterface_t* glInterface, const gr_context_options_t* options);
-SK_C_API gr_direct_context_t* gr_direct_context_make_vulkan(const gr_vk_backendcontext_t vkBackendContext);
-SK_C_API gr_direct_context_t* gr_direct_context_make_vulkan_with_options(const gr_vk_backendcontext_t vkBackendContext, const gr_context_options_t* options);
+SK_C_API gr_direct_context_t* gr_direct_context_make_vulkan(const gr_vk_backendcontext_t* vkBackendContext);
+SK_C_API gr_direct_context_t* gr_direct_context_make_vulkan_with_options(const gr_vk_backendcontext_t* vkBackendContext, const gr_context_options_t* options);
 SK_C_API gr_direct_context_t* gr_direct_context_make_metal(void* device, void* queue);
 SK_C_API gr_direct_context_t* gr_direct_context_make_metal_with_options(void* device, void* queue, const gr_context_options_t* options);
-SK_C_API gr_direct_context_t* gr_direct_context_make_direct3d(const gr_d3d_backendcontext_t d3dBackendContext);
-SK_C_API gr_direct_context_t* gr_direct_context_make_direct3d_with_options(const gr_d3d_backendcontext_t d3dBackendContext, const gr_context_options_t* options);
+SK_C_API gr_direct_context_t* gr_direct_context_make_direct3d(const gr_d3d_backendcontext_t* d3dBackendContext);
+SK_C_API gr_direct_context_t* gr_direct_context_make_direct3d_with_options(const gr_d3d_backendcontext_t* d3dBackendContext, const gr_context_options_t* options);
 
 // TODO: the overloads with GrContextOptions
 

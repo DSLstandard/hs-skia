@@ -7,14 +7,10 @@
  * found in the LICENSE file.
  */
 
-#include "include/core/SkShader.h"
-#include "include/effects/SkBlurMaskFilter.h"
-#include "include/effects/SkTableMaskFilter.h"
-#include "include/effects/SkShaderMaskFilter.h"
 
-#include "include/c/sk_maskfilter.h"
+#include "skia_capi/sk_maskfilter.h"
 
-#include "src/c/sk_types_priv.h"
+#include "common_include_pch.hpp"
 
 sk_maskfilter_t* sk_maskfilter_new_table(const uint8_t table[256]) {
     return ToMaskFilter(SkTableMaskFilter::Create(table));
