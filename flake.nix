@@ -7,8 +7,9 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        monoSkiaPkg = pkgs.callPackage ./mono-skia-package.nix {};
         hPkgs = pkgs.haskell.packages."ghc966";
+
+        skia129 = pkgs.callPackage ./skia-129-modified.nix {};
 
         devDeps = [
           # Apparently without this, entering a nix shell breaks your VSCode terminal's bash's PS1.
@@ -22,6 +23,12 @@
           hPkgs.fourmolu
           hPkgs.haskell-language-server
           hPkgs.hpack
+
+          # For working with cbits/ and cbits_cmake/
+          pkgs.clang
+          pkgs.pkg-config
+          pkgs.cmake 
+          pkgs.ninja
         ];
 
         libDeps = with pkgs; [
@@ -29,12 +36,26 @@
           # (Specifically package 'warp' needs `-lz`, 'warp' is needed by `stack hoogle --server`)
           zlib
 
-          # skia
-          monoSkiaPkg
-          gn
-          gcc
-          fontconfig
-          expat # required by 'fontconfig'
+          # skia # We actually want version=129-unstable-2024-09-18.
+          skia129
+
+          fontconfig # Skia fontmgr ports
+          expat # Required by fontconfig
+
+          # For programs under demos/ using GLFW.
+          #
+          # The 'xorg.*' libs are learned from error messages generated when demo
+          # programs failed to launch.
+          glfw
+          xorg.libX11
+          xorg.libXi
+          xorg.libXrandr
+          xorg.libXxf86vm
+          xorg.libXcursor
+          xorg.libXinerama
+
+          # For programs under demos/ using SDL2.
+          SDL2
         ];
 
         pyDeps = [
@@ -42,6 +63,7 @@
         ] ++ (with pkgs.python311Packages; [
             pycparser
             pytest
+            pyyaml
         ]);
       in {
         devShells.default = pkgs.mkShell {
