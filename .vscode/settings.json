@@ -1,0 +1,6 @@
+{
+    "[haskell]": {
+        "editor.indentSize": 2,
+    },
+    "haskell.formattingProvider": "fourmolu",
+}
