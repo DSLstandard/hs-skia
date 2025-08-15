@@ -115,7 +115,7 @@ privCreateGradientRaw ::
   Int ->
   SKShaderTileMode ->
   -- | Local matrix
-  M33 Float ->
+  Maybe (M33 Float) ->
   m (Ptr Sk_shader)
 privCreateGradientRaw gradient inColorArray colorPosArray colorCount tileMode localMatrix = evalManaged do
   -- NOTE: This function is implemented in such a way so all 4 gradient types
@@ -160,7 +160,7 @@ privCreateGradientRaw gradient inColorArray colorPosArray colorCount tileMode lo
       pure $ newGradientColor4f colorArray' (ptrOrNull colorspace)
 
   -- Pass other common arguments
-  localMatrix' <- storable $ toSKMatrix localMatrix
+  localMatrix' <- useNullIfNothing storable $ toSKMatrix <$> localMatrix
   liftIO $ newShader (castPtr colorPosArray) (fromIntegral colorCount) (marshalSKEnum tileMode) localMatrix'
 
 -- | Creates a gradient shader from a list of colors and positions.
@@ -171,7 +171,7 @@ createGradient ::
   [(Float, SKColor)] ->
   SKShaderTileMode ->
   -- | Local matrix
-  M33 Float ->
+  Maybe (M33 Float) ->
   m (ReleaseKey, SKShader)
 createGradient gradient entries tileMode localMatrix =
   allocateSKObjectNeverNull
@@ -192,7 +192,7 @@ createGradientRGBA ::
   Maybe SKColorSpace ->
   SKShaderTileMode ->
   -- | Local matrix
-  M33 Float ->
+  Maybe (M33 Float) ->
   m (ReleaseKey, SKShader)
 createGradientRGBA gradient entries colorspace tileMode localMatrix =
   allocateSKObjectNeverNull
