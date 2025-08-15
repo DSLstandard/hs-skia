@@ -1,6 +1,6 @@
 module Skia.SKColorType where
 
-import Skia.Bindings.Sk_general
+import Skia.Bindings.Sk_color
 import Skia.Internal.Prelude
 
 {- | Selects the native 32-bit ARGB format for the current configuration. This

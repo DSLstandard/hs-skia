@@ -40,12 +40,6 @@ void sk_nvrefcnt_safe_unref(sk_nvrefcnt_t* refcnt) {
     SkSafeUnref(AsNVRefCnt(refcnt));
 }
 
-// color type
-
-sk_colortype_t sk_colortype_get_default_8888(void) {
-    return (sk_colortype_t)SkColorType::kN32_SkColorType;
-}
-
 // library information
 
 int sk_version_get_milestone(void) {

@@ -39,6 +39,7 @@ library
       Skia.Bindings.Sk_blender
       Skia.Bindings.Sk_canvas
       Skia.Bindings.Sk_codec
+      Skia.Bindings.Sk_color
       Skia.Bindings.Sk_colorfilter
       Skia.Bindings.Sk_colorspace
       Skia.Bindings.Sk_data

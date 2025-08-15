@@ -1,5 +1,6 @@
 module Skia.Bindings (
   module Skia.Bindings.Types,
+  module Skia.Bindings.Sk_color,
   module Skia.Bindings.Sk_imagefilter,
   module Skia.Bindings.Sk_maskfilter,
   module Skia.Bindings.Sk_vertices,
@@ -42,6 +43,7 @@ module Skia.Bindings (
 ) where
 
 import Skia.Bindings.Types
+import Skia.Bindings.Sk_color
 import Skia.Bindings.Sk_imagefilter
 import Skia.Bindings.Sk_maskfilter
 import Skia.Bindings.Sk_vertices

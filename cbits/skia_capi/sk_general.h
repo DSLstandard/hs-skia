@@ -22,10 +22,6 @@ SK_C_API bool sk_nvrefcnt_unique(const sk_nvrefcnt_t* refcnt);
 SK_C_API void sk_nvrefcnt_safe_ref(sk_nvrefcnt_t* refcnt);
 SK_C_API void sk_nvrefcnt_safe_unref(sk_nvrefcnt_t* refcnt);
 
-// color type
-
-SK_C_API sk_colortype_t sk_colortype_get_default_8888(void);
-
 // library information
 
 SK_C_API int sk_version_get_milestone(void);

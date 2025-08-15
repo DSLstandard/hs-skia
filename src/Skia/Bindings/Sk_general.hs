@@ -115,19 +115,6 @@ foreign import ccall "&sk_nvrefcnt_safe_unref" p'sk_nvrefcnt_safe_unref ::
 {- | C function signature:
 
 @
-sk_colortype_t sk_colortype_get_default_8888(void)
-@
--}
-foreign import ccall "sk_colortype_get_default_8888" sk_colortype_get_default_8888 ::
-  IO (Sk_colortype) -- ^ C return type: @"sk_colortype_t"@
-
--- | Function pointer to 'sk_colortype_get_default_8888'
-foreign import ccall "&sk_colortype_get_default_8888" p'sk_colortype_get_default_8888 ::
-  FunPtr (IO (Sk_colortype))
-
-{- | C function signature:
-
-@
 int sk_version_get_milestone(void)
 @
 -}
