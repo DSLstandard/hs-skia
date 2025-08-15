@@ -2,8 +2,6 @@ module Skia.SKVersion where
 
 import Skia.Internal.Prelude
 import Skia.Bindings.Sk_general
-import System.IO.Unsafe
-import Foreign.C.String (peekCString)
 
 getMilestone :: (MonadIO m) => m Int
 getMilestone = liftIO $ fromIntegral <$> sk_version_get_milestone
