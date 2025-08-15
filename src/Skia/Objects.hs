@@ -551,13 +551,6 @@ $( qGenerateSKObject
  )
 
 $( qGenerateSKObject
-    "SKFileStream"
-    ''Sk_stream_filestream
-    [''SKWStream] -- class SK_API SkFILEWStream : public SkWStream {
-    ""
- )
-
-$( qGenerateSKObject
     "SKStreamRewindable"
     ''Sk_stream_streamrewindable
     [''SKStream] -- class SK_API SkStreamRewindable : public SkStream {
@@ -600,6 +593,13 @@ $( qGenerateSKObject
 
         It is a light-weight container holding a pointer + an offset.
     |]
+ )
+
+$( qGenerateSKObject
+    "SKFileStream"
+    ''Sk_stream_filestream
+    [''SKStreamAsset] -- class SK_API SkFILEStream : public SkStreamAsset {
+    ""
  )
 
 $( qGenerateSKObject

@@ -96,6 +96,7 @@ library
       Skia.SKColorSpace
       Skia.SKColorType
       Skia.SKData
+      Skia.SKFileStream
       Skia.SKFileWStream
       Skia.SKFont
       Skia.SKFontManager
