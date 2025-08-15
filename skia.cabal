@@ -121,6 +121,7 @@ library
       Skia.SKRegion
       Skia.SKRRect
       Skia.SKSamplingOptions
+      Skia.SKShader
       Skia.SKString
       Skia.SKSurface
       Skia.SKSurfaceProps
