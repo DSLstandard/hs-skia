@@ -53,7 +53,7 @@ SK_C_API skottie_animation_builder_t* skottie_animation_builder_new(skottie_anim
 SK_C_API void skottie_animation_builder_delete(skottie_animation_builder_t *instance);
 
 SK_C_API void skottie_animation_builder_get_stats(skottie_animation_builder_t* instance, skottie_animation_builder_stats_t* stats);
-SK_C_API void skottie_animation_builder_set_resource_provider(skottie_animation_builder_t* instance, skottie_resource_provider_t* resourceProvider);
+SK_C_API void skottie_animation_builder_set_resource_provider(skottie_animation_builder_t* instance, skresources_resource_provider_t* resourceProvider);
 SK_C_API void skottie_animation_builder_set_font_manager(skottie_animation_builder_t* instance, sk_fontmgr_t* fontManager);
 
 SK_C_API skottie_animation_t* skottie_animation_builder_make_from_stream(skottie_animation_builder_t* instance, sk_stream_t* stream);

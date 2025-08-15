@@ -349,7 +349,6 @@ DEF_CLASS_MAP_WITH_NS(skottie, Animation, skottie_animation_t, SkottieAnimation)
 DEF_CLASS_MAP_WITH_NS(skottie::Animation, Builder, skottie_animation_builder_t, SkottieAnimationBuilder)
 DEF_MAP(skottie::Animation::Builder::Stats, skottie_animation_builder_stats_t, SkottieAnimationBuilderStats)
 
-DEF_CLASS_MAP_WITH_NS(skottie, ResourceProvider, skottie_resource_provider_t, SkottieResourceProvider)
 DEF_CLASS_MAP_WITH_NS(skottie, PropertyObserver, skottie_property_observer_t, SkottiePropertyObserver)
 DEF_CLASS_MAP_WITH_NS(skottie, Logger, skottie_logger_t, SkottieLogger)
 DEF_CLASS_MAP_WITH_NS(skottie, MarkerObserver, skottie_marker_observer_t, SkottieMarkerObserver)

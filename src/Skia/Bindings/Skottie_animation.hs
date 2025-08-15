@@ -341,17 +341,17 @@ foreign import ccall "&skottie_animation_builder_get_stats" p'skottie_animation_
 {- | C function signature:
 
 @
-void skottie_animation_builder_set_resource_provider(skottie_animation_builder_t *instance, skottie_resource_provider_t *resourceProvider)
+void skottie_animation_builder_set_resource_provider(skottie_animation_builder_t *instance, skresources_resource_provider_t *resourceProvider)
 @
 -}
 foreign import ccall "skottie_animation_builder_set_resource_provider" skottie_animation_builder_set_resource_provider ::
   Ptr (Skottie_animation_builder) -- ^ C argument @"skottie_animation_builder_t * instance"@
-  -> Ptr (Skottie_resource_provider) -- ^ C argument @"skottie_resource_provider_t * resourceProvider"@
+  -> Ptr (Skresources_resource_provider) -- ^ C argument @"skresources_resource_provider_t * resourceProvider"@
   -> IO (()) -- ^ C return type: @"void"@
 
 -- | Function pointer to 'skottie_animation_builder_set_resource_provider'
 foreign import ccall "&skottie_animation_builder_set_resource_provider" p'skottie_animation_builder_set_resource_provider ::
-  FunPtr (Ptr (Skottie_animation_builder) -> Ptr (Skottie_resource_provider) -> IO (()))
+  FunPtr (Ptr (Skottie_animation_builder) -> Ptr (Skresources_resource_provider) -> IO (()))
 
 {- | C function signature:
 

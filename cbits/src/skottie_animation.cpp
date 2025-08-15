@@ -95,8 +95,8 @@ void skottie_animation_builder_get_stats(skottie_animation_builder_t* instance, 
     *stats = ToSkottieAnimationBuilderStats(AsSkottieAnimationBuilder(instance)->getStats());
 }
 
-void skottie_animation_builder_set_resource_provider(skottie_animation_builder_t* instance, skottie_resource_provider_t* resourceProvider) {
-    AsSkottieAnimationBuilder(instance)->setResourceProvider(sk_ref_sp(AsSkottieResourceProvider(resourceProvider)));
+void skottie_animation_builder_set_resource_provider(skottie_animation_builder_t* instance, skresources_resource_provider_t* resourceProvider) {
+    AsSkottieAnimationBuilder(instance)->setResourceProvider(sk_ref_sp(AsSkResourcesResourceProvider(resourceProvider)));
 }
 
 void skottie_animation_builder_set_font_manager(skottie_animation_builder_t* instance, sk_fontmgr_t* fontManager) {

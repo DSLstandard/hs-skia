@@ -1176,7 +1176,6 @@ SK_C_PLUS_PLUS_BEGIN_GUARD
 
 typedef struct skottie_animation_t skottie_animation_t;
 typedef struct skottie_animation_builder_t skottie_animation_builder_t;
-typedef struct skottie_resource_provider_t skottie_resource_provider_t;
 typedef struct skottie_property_observer_t skottie_property_observer_t;
 typedef struct skottie_logger_t skottie_logger_t;
 typedef struct skottie_marker_observer_t skottie_marker_observer_t;

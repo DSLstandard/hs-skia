@@ -4730,10 +4730,6 @@ data Skottie_animation = Skottie_animation
 -}
 data Skottie_animation_builder = Skottie_animation_builder
 
-{- | Opaque C struct: @"skottie_resource_provider_t"@
--}
-data Skottie_resource_provider = Skottie_resource_provider
-
 {- | Opaque C struct: @"skottie_property_observer_t"@
 -}
 data Skottie_property_observer = Skottie_property_observer

@@ -177,3 +177,19 @@ executables:
     main: DemoListSKUnicodeBackends.hs
     other-modules: []
     dependencies: [base, skia, resourcet]
+
+  demo-skottie-animation-viewer:
+    source-dirs: demos/
+    main: DemoSkottieAnimationViewer.hs
+    other-modules: [SharedUtils.MakeDemoApp]
+    dependencies:
+      - base
+      - GLFW-b
+      - OpenGLRaw
+      - skia
+      - time
+      - optparse-applicative
+      - linear
+      - text
+      - resourcet
+      - directory
