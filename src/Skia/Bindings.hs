@@ -22,6 +22,7 @@ module Skia.Bindings (
   module Skia.Bindings.Sk_path,
   module Skia.Bindings.Sk_fontmgr,
   module Skia.Bindings.Sk_blender,
+  module Skia.Bindings.Sksvg,
   module Skia.Bindings.Sk_shader,
   module Skia.Bindings.Sk_surface,
   module Skia.Bindings.Sk_rrect,
@@ -65,6 +66,7 @@ import Skia.Bindings.Sk_image
 import Skia.Bindings.Sk_path
 import Skia.Bindings.Sk_fontmgr
 import Skia.Bindings.Sk_blender
+import Skia.Bindings.Sksvg
 import Skia.Bindings.Sk_shader
 import Skia.Bindings.Sk_surface
 import Skia.Bindings.Sk_rrect

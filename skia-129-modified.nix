@@ -120,6 +120,7 @@ index 8a819a358c..e467433e60 100644
       "skia_enable_skshaper=true"
       "skia_enable_skunicode=true"
       "skia_enable_skottie=true"
+      "skia_enable_svg=true"
       # Use system dependencies
       "extra_cflags=[\"-I${harfbuzzFull.dev}/include/harfbuzz\"]"
       "cc=\"${stdenv.cc.targetPrefix}cc\""

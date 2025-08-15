@@ -5858,3 +5858,7 @@ data Skresources_resource_provider = Skresources_resource_provider
 {- | Opaque C struct: @"skunicode_skunicode_t"@
 -}
 data Skunicode_skunicode = Skunicode_skunicode
+
+{- | Opaque C struct: @"sksvg_dom_t"@
+-}
+data Sksvg_dom = Sksvg_dom

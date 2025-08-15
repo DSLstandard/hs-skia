@@ -1489,3 +1489,11 @@ SK_C_PLUS_PLUS_BEGIN_GUARD
 typedef struct skunicode_skunicode_t skunicode_skunicode_t;
 
 SK_C_PLUS_PLUS_END_GUARD
+
+// ** SkSVG
+
+SK_C_PLUS_PLUS_BEGIN_GUARD
+
+typedef struct sksvg_dom_t sksvg_dom_t;
+
+SK_C_PLUS_PLUS_END_GUARD

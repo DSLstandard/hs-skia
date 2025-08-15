@@ -73,6 +73,7 @@ library
       Skia.Bindings.Skparagraph
       Skia.Bindings.Skresources_resource_provider
       Skia.Bindings.Sksg_invalidation_controller
+      Skia.Bindings.Sksvg
       Skia.Bindings.Skunicode
       Skia.Bindings.Types
       Skia.Color
@@ -126,6 +127,8 @@ library
       Skia.SKString
       Skia.SKSurface
       Skia.SKSurfaceProps
+      Skia.SKSvg.Dom
+      Skia.SKSvg.Objects
       Skia.SKUnicode
       Skia.SKVersion
       Skia.SKWStream
@@ -187,6 +190,7 @@ library
   extra-libraries:
       stdc++
       skunicode_icu
+      svg
       skia_capi_shared
   pkgconfig-depends:
       skia

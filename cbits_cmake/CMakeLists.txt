@@ -27,7 +27,14 @@ target_precompile_headers(skia_capi_objs PRIVATE "${CBITS_DIR}/src/common_includ
 
 # Other Skia components/libraries/modules. NOTE: do not link skunicode_icu or
 # other SkUnicode backends, it shall be modularly linked by end users.
-set(EXTRA_SKIA_LIBS_STUFF skresources skottie skcms skunicode_core skparagraph)
+set(EXTRA_SKIA_LIBS_STUFF
+  skresources
+  skottie
+  skcms
+  skunicode_core
+  skparagraph
+  svg
+)
 
 # ** Setup static library
 add_library(skia_capi_static STATIC $<TARGET_OBJECTS:skia_capi_objs>)

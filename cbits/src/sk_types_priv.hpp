@@ -491,4 +491,12 @@ DEF_MAP(skia::textlayout::CanvasParagraphPainter, skparagraph_canvas_paragraph_p
 
 DEF_CLASS_MAP(SkUnicode, skunicode_skunicode_t, SkUnicode);
 
+/*
+ * sksvg
+ */
+
+#include "modules/svg/include/SkSVGDOM.h"
+
+DEF_CLASS_MAP(SkSVGDOM, sksvg_dom_t, SkSVGDOM);
+
 #endif

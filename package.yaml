@@ -120,6 +120,7 @@ library:
   extra-libraries:
     - stdc++ # Required for C++ code to avoid undefined reference errors
     - skunicode_icu # TODO: Add other SkUnicode backends too.
+    - svg # Skia's libsvg.so
 
     # VERT IMPORTANT NOTE: Setup.hs will add the current extra-library-paths to
     # Cabal for it to discover where skia_capi_shared resides.
