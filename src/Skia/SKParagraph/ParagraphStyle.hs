@@ -44,7 +44,14 @@ setMaxLines para maxLines = liftIO do
   -- }
   skparagraph_paragraph_style_set_max_lines (ptr para) (maybe maxBound fromIntegral maxLines)
 
--- | Sets the ellipsis string for the paragraph.
+{- | Sets the ellipsis string for the paragraph.
+
+If the input string is empty, no ellipsis is applied and the text would wrap
+into new lines.
+
+If the input string is not empty, ellipsis is applied and the text would
+truncate and never wrap into new lines.
+-}
 setEllipsis :: (MonadIO m) => ParagraphStyle -> T.Text -> m ()
 setEllipsis para ellipsis = liftIO $ runResourceT do
   (_, ellipsisSKString) <- SKString.createFromText ellipsis
