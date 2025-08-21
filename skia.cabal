@@ -119,6 +119,7 @@ library
       Skia.SKParagraph.TextShadow
       Skia.SKParagraph.TextStyle
       Skia.SKPath
+      Skia.SKPathEffect
       Skia.SKPixmap
       Skia.SKRefCnt
       Skia.SKRegion
