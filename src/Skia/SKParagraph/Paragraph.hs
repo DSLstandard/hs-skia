@@ -95,10 +95,14 @@ data GlyphClusterInfo = GlyphClusterInfo
   }
   deriving (Show)
 
+-- | Finds the closest glyph cluster for a visual text position
 getClosestGlyphClusterAt ::
   (MonadIO m) =>
   Paragraph ->
+  -- | (x, y) coordinate
   V2 Float ->
+  -- | 'Just' if glyph cluster was found; 'Nothing' if not (which usually
+  -- means the paragraph is empty)
   m (Maybe GlyphClusterInfo)
 getClosestGlyphClusterAt para (V2 x y) = evalManaged do
   glyphInfo' <- managed alloca
@@ -110,11 +114,14 @@ getClosestGlyphClusterAt para (V2 x y) = evalManaged do
     else do
       pure Nothing
 
+-- | Finds a glyph cluster for text index
 getGlyphClusterAt ::
   (MonadIO m) =>
   Paragraph ->
   -- | UTF8 code unit index
   Int ->
+  -- | 'Just' if glyph cluster was found; 'Nothing' if not (which usually means
+  -- the given index is invalid or out of bounds)
   m (Maybe GlyphClusterInfo)
 getGlyphClusterAt para codeUnitIndex = evalManaged do
   glyphInfo' <- managed alloca
