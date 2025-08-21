@@ -35,6 +35,8 @@ https://gist.github.com/ad8e/dd150b775ae6aa4d5cf1a092e4713add
 - "instructions to use skia and glfw together. (download, installation, first
 program). as of Sept 2023, Windows is broken but this is still sadly the best
 starting resource for skia on Windows too."
+
+Another reference is https://skia.org/docs/user/api/skcanvas_creation/.
 -}
 
 kWidth, kHeight :: Int
