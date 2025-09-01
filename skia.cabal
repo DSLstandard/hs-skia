@@ -207,6 +207,7 @@ library
       Skia.SKImage
       Skia.SKImageEncoder
       Skia.SKImageInfo
+      Skia.SKMemoryStream
       Skia.Skottie.Animation
       Skia.Skottie.AnimationBuilder
       Skia.SKPaint
