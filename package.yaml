@@ -102,16 +102,13 @@ library:
     - haskell-src-exts
     - haskell-src-meta
     - imp ^>= 1.0.0.0 # About 'imp', see https://taylor.fausak.me/2024/03/31/alias-current-module/
-    - inline-c
     - linear
-    - mtl
     - neat-interpolation
     - resourcet
     - storable-offset
     - template-haskell
     - text
     - time
-    - transformers
     - vector
     - managed
   source-dirs: src/
@@ -137,47 +134,68 @@ executables:
     source-dirs: demos/
     main: DemoRasterExampleBindingsOnly.hs
     other-modules: []
-    dependencies: [base, skia]
+    dependencies:
+      - base
+      - skia
 
   demo-raster-example:
     source-dirs: demos/
     main: DemoRasterExample.hs
     other-modules: []
-    dependencies: [base, skia, resourcet, linear]
+    dependencies:
+      - base
+      - linear
+      - resourcet
+      - skia
 
   demo-glfw-opengl:
     source-dirs: demos/
     main: DemoGLFWOpenGL.hs
     other-modules: []
-    dependencies: [base, GLFW-b, OpenGLRaw, skia, linear, text, resourcet]
+    dependencies:
+      - GLFW-b
+      - OpenGLRaw
+      - base
+      - linear
+      - resourcet
+      - skia
+      - text
 
   demo-sdl2-opengl:
     source-dirs: demos/
     main: DemoSDL2OpenGL.hs
     other-modules: []
-    dependencies: [base, sdl2, OpenGLRaw, skia, linear, text, resourcet]
+    dependencies:
+      - OpenGLRaw
+      - base
+      - linear
+      - resourcet
+      - sdl2
+      - skia
+      - text
 
   demo-skparagraph:
     source-dirs: demos/
     main: DemoSKParagraph.hs
     other-modules: [SharedUtils.MakeDemoApp]
     dependencies:
-      [
-        base,
-        GLFW-b,
-        OpenGLRaw,
-        skia,
-        linear,
-        text,
-        resourcet,
-        neat-interpolation,
-      ]
+      - GLFW-b
+      - OpenGLRaw
+      - base
+      - linear
+      - neat-interpolation
+      - resourcet
+      - skia
+      - text
 
   demo-list-skunicode-backends:
     source-dirs: demos/
     main: DemoListSKUnicodeBackends.hs
     other-modules: []
-    dependencies: [base, skia, resourcet]
+    dependencies:
+      - base
+      - resourcet
+      - skia
 
   demo-skottie-animation-viewer:
     source-dirs: demos/
