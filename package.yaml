@@ -87,7 +87,7 @@ flags:
     manual: true
 
 extra-source-files:
-  - cbits/**
+  - cbits/**/*
   - cbits_cmake/CMakeLists.txt
 
 # build-type: Custom (hpack also sets it if the 'custom-setup' section is present)
