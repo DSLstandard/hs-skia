@@ -25,26 +25,36 @@ target_precompile_headers(skia_capi_objs PRIVATE "${CBITS_DIR}/src/common_includ
 
 # ** Misc variables
 
-# Other Skia components/libraries/modules. NOTE: do not link skunicode_icu or
-# other SkUnicode backends, it shall be modularly linked by end users.
-set(EXTRA_SKIA_LIBS_STUFF
-  skresources
-  skottie
+# Some Skia libraries happen to be static libraries (when Skia is built with
+# `is_component_build=true`).
+set(EXTRA_SKIA_STATIC_LIBS
   skcms
-  skunicode_core
+  pathkit
+  skresources
+)
+set(EXTRA_SKIA_SHARED_LIBS
+  skia
+  skottie
   skparagraph
+  sksg
+  skshaper
+  # Other backends skunicode_* should be linked by the user on demand.
+  #
+  # N.B. skia_capi has weak symbols referencing the SKUnicode constructions of
+  # other backends to enable ad-hoc backend support through ld.
+  skunicode_core
   svg
 )
 
 # ** Setup static library
 add_library(skia_capi_static STATIC $<TARGET_OBJECTS:skia_capi_objs>)
-set_target_properties(skia_capi_static PROPERTIES OUTPUT_NAME skia_capi)
-target_link_libraries(skia_capi_static PRIVATE ${SKIA_LINK_LIBRARIES} ${EXTRA_SKIA_LIBS_STUFF})
+set_target_properties(skia_capi_static PROPERTIES OUTPUT_NAME skia_capi_static)
+target_link_libraries(skia_capi_static PRIVATE ${SKIA_LINK_LIBRARIES} ${EXTRA_SKIA_STATIC_LIBS})
 
 # ** Setup shared library for `cabal repl` and the Haskell Language Server
 add_library(skia_capi_shared SHARED $<TARGET_OBJECTS:skia_capi_objs>)
 set_target_properties(skia_capi_shared PROPERTIES OUTPUT_NAME skia_capi_shared)
-target_link_libraries(skia_capi_shared PRIVATE ${SKIA_LINK_LIBRARIES} ${EXTRA_SKIA_LIBS_STUFF})
+target_link_libraries(skia_capi_shared PRIVATE ${SKIA_LINK_LIBRARIES} ${EXTRA_SKIA_STATIC_LIBS} ${EXTRA_SKIA_SHARED_LIBS})
 target_compile_options(skia_capi_shared PRIVATE -fPIC)
 
 # For developing cbits/ with clangd

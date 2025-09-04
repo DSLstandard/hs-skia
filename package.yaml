@@ -73,6 +73,18 @@ flags:
       little runtime cost, thus it is recommended to leave this flag on.
     default: true
     manual: true
+  use-skia-capi-shared-lib:
+    description: >
+      A flag for developers. Normal users may ignore this.
+      When false (the default), @skia_capi@ is built as a static library and is
+      linked statically to hs-skia.
+      When true, @skia_capi@ is built as a shared library WITH ALL SKIA STATIC
+      LIBRARIES LINKED. The @skia_capi@ shared library is then dynamically
+      linked to hs-skia. The purpose of this is to enable running `cabal repl
+      skia` for developing hs-skia, as `cabal repl` can only load C shared
+      libraries.
+    default: false
+    manual: true
 
 extra-source-files:
   - cbits/**
@@ -113,21 +125,44 @@ library:
     - managed
   source-dirs: src/
   pkg-config-dependencies:
+    # The pkg-config pf 'skia' tells Cabal the library path of Skia and also has
+    # the -lskia flag, but it does not link the other Skia libraries like
+    # 'skottie', 'skparagraph', etc.
     - skia
-  extra-libraries:
-    - stdc++ # Required for C++ code to avoid undefined reference errors
-    - skunicode_icu # TODO: Add other SkUnicode backends too.
-    - svg # Skia's libsvg.so
-
-    # VERT IMPORTANT NOTE: Setup.hs will add the current extra-library-paths to
-    # Cabal for it to discover where skia_capi_shared resides.
-    - skia_capi_shared
   include-dirs:
     - cbits/
     - cbits/fake_headers
   when:
     - condition: flag(enable-skia-assertions)
       cpp-options: -DHS_SKIA_SKIA_ASSERTIONS_ENABLED
+    
+    - condition: "!flag(use-skia-capi-shared-lib)"
+      extra-libraries:
+        # Required for C++ code to avoid undefined reference errors
+        - stdc++
+
+        # Skia shared libraries to link.
+        #
+        # Built executables depending on hs-skia will automatically link to the necessary
+        # Skia shared libraries listed here. See cbits_cmake/CMakeLists.txt to learn
+        # what to link.
+        - skia
+        - skottie
+        - skparagraph
+        - sksg
+        - skshaper
+        - skunicode_core
+        - skunicode_icu # TODO: Add other SkUnicode backends too, or create a package flag for each Skia SKUnicode backend.
+        - svg
+
+        - skia_capi_static
+
+    - condition: flag(use-skia-capi-shared-lib)
+      extra-libraries:
+        # N.B. We don't need to list all the Skia libraries here because
+        # skia_capi_shared already links to them. We will be linked to those
+        # Skia shared libraries transitively.
+        - skia_capi_shared
 
 executables:
   demo-raster-example-bindings-only:

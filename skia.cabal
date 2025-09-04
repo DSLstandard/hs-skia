@@ -31,6 +31,12 @@ flag enable-skia-assertions
   manual: True
   default: True
 
+flag use-skia-capi-shared-lib
+  description: A flag for developers. Normal users may ignore this. When false (the default), @skia_capi@ is built as a static library and is linked statically to hs-skia. When true, @skia_capi@ is built as a shared library WITH ALL SKIA STATIC LIBRARIES LINKED. The @skia_capi@ shared library is then dynamically linked to hs-skia. The purpose of this is to enable running `cabal repl skia` for developing hs-skia, as `cabal repl` can only load C shared libraries.
+
+  manual: True
+  default: False
+
 library
   exposed-modules:
       Skia.Bindings
@@ -189,11 +195,6 @@ library
   include-dirs:
       cbits/
       cbits/fake_headers
-  extra-libraries:
-      stdc++
-      skunicode_icu
-      svg
-      skia_capi_shared
   pkgconfig-depends:
       skia
   build-tools:
@@ -217,6 +218,21 @@ library
   default-language: Haskell2010
   if flag(enable-skia-assertions)
     cpp-options: -DHS_SKIA_SKIA_ASSERTIONS_ENABLED
+  if !flag(use-skia-capi-shared-lib)
+    extra-libraries:
+        stdc++
+        skia
+        skottie
+        skparagraph
+        sksg
+        skshaper
+        skunicode_core
+        skunicode_icu
+        svg
+        skia_capi_static
+  if flag(use-skia-capi-shared-lib)
+    extra-libraries:
+        skia_capi_shared
 
 executable demo-glfw-opengl
   main-is: DemoGLFWOpenGL.hs
