@@ -321,6 +321,10 @@ SK_C_API void skparagraph_paragraph_builder_add_text_utf8(
 SK_C_API void skparagraph_paragraph_builder_add_text_utf8_len(
     skparagraph_paragraph_builder_t *builder, const char *text, size_t len
 );
+SK_C_API void skparagraph_paragraph_builder_add_placeholder(
+    skparagraph_paragraph_builder_t *builder,
+    skparagraph_placeholder_style_t *instyle
+);
 SK_C_API skparagraph_paragraph_t *skparagraph_paragraph_builder_build(
     skparagraph_paragraph_builder_t *builder
 );

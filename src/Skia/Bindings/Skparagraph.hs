@@ -1295,6 +1295,21 @@ foreign import ccall "&skparagraph_paragraph_builder_add_text_utf8_len" p'skpara
 {- | C function signature:
 
 @
+void skparagraph_paragraph_builder_add_placeholder(skparagraph_paragraph_builder_t *builder, skparagraph_placeholder_style_t *instyle)
+@
+-}
+foreign import ccall "skparagraph_paragraph_builder_add_placeholder" skparagraph_paragraph_builder_add_placeholder ::
+  Ptr (Skparagraph_paragraph_builder) -- ^ C argument @"skparagraph_paragraph_builder_t * builder"@
+  -> Ptr (Skparagraph_placeholder_style) -- ^ C argument @"skparagraph_placeholder_style_t * instyle"@
+  -> IO (()) -- ^ C return type: @"void"@
+
+-- | Function pointer to 'skparagraph_paragraph_builder_add_placeholder'
+foreign import ccall "&skparagraph_paragraph_builder_add_placeholder" p'skparagraph_paragraph_builder_add_placeholder ::
+  FunPtr (Ptr (Skparagraph_paragraph_builder) -> Ptr (Skparagraph_placeholder_style) -> IO (()))
+
+{- | C function signature:
+
+@
 skparagraph_paragraph_t *skparagraph_paragraph_builder_build(skparagraph_paragraph_builder_t *builder)
 @
 -}

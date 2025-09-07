@@ -146,6 +146,14 @@ setPlaceholder :: (MonadIO m) => TextStyle -> m ()
 setPlaceholder style = liftIO do
   skparagraph_text_style_set_placeholder (ptr style)
 
+data PlaceholderStyle = PlaceholderStyle
+  { width :: Float
+  , height :: Float
+  , alignment :: PlaceholderAlignment
+  , baseline :: TextBaseline
+  , baselineOffset :: Float
+  }
+
 -- * Marshal utils
 
 marshalTextDecoration :: TextDecoration -> Skparagraph_text_decoration_flags
@@ -155,3 +163,14 @@ marshalTextDecoration d =
     , (d.overline, OVERLINE_SKPARAGRAPH_TEXT_DECORATION_FLAGS)
     , (d.lineThrough, LINETHROUGH_SKPARAGRAPH_TEXT_DECORATION_FLAGS)
     ]
+
+marshalPlaceholderStyle :: PlaceholderStyle -> Managed (Ptr Skparagraph_placeholder_style)
+marshalPlaceholderStyle style =
+  storable $
+    Skparagraph_placeholder_style
+      { fWidth = coerce style.width
+      , fHeight = coerce style.height
+      , fAlignment = marshalSKEnum style.alignment
+      , fBaseline = marshalSKEnum style.baseline
+      , fBaselineOffset = coerce style.baselineOffset
+      }

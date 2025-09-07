@@ -624,6 +624,19 @@ void skparagraph_paragraph_builder_add_text_utf8_len(
     AsSkParagraphBuilder(builder)->addText(text, len);
 }
 
+void skparagraph_paragraph_builder_add_placeholder(
+    skparagraph_paragraph_builder_t *builder,
+    skparagraph_placeholder_style_t *instyle
+) {
+    skia::textlayout::PlaceholderStyle style(
+        instyle->fWidth, instyle->fHeight,
+        (skia::textlayout::PlaceholderAlignment)instyle->fAlignment,
+        (skia::textlayout::TextBaseline)instyle->fBaseline,
+        instyle->fBaselineOffset
+    );
+    AsSkParagraphBuilder(builder)->addPlaceholder(style);
+}
+
 skparagraph_paragraph_t *skparagraph_paragraph_builder_build(
     skparagraph_paragraph_builder_t *builder
 ) {

@@ -4,6 +4,7 @@ import Data.ByteString qualified as BS
 import Data.Text qualified as T
 import Skia.Bindings.Skparagraph
 import Skia.SKParagraph.Internal.Prelude
+import Skia.SKParagraph.TextStyle
 
 create ::
   (MonadResource m) =>
@@ -29,6 +30,11 @@ addText :: (MonadIO m, IsParagraphBuilder builder) => builder -> T.Text -> m ()
 addText (toA ParagraphBuilder -> builder) text = evalManaged do
   (utf8', len) <- storableTextUTF8Len text
   liftIO $ skparagraph_paragraph_builder_add_text_utf8_len (ptr builder) utf8' (fromIntegral len)
+
+addPlaceholder :: (MonadIO m, IsParagraphBuilder builder) => builder -> PlaceholderStyle -> m ()
+addPlaceholder (toA ParagraphBuilder -> builder) style = evalManaged do
+  style' <- marshalPlaceholderStyle style
+  liftIO $ skparagraph_paragraph_builder_add_placeholder (ptr builder) style'
 
 build :: (MonadResource m, IsParagraphBuilder builder) => builder -> m (ReleaseKey, Paragraph)
 build (toA ParagraphBuilder -> builder) =
