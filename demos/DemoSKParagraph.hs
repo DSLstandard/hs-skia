@@ -9,20 +9,17 @@ import Graphics.UI.GLFW qualified as GLFW
 import Linear
 import NeatInterpolation
 import SharedUtils.MakeDemoApp
-import Skia.Color
-import Skia.Rect
-import Skia.Enums
-import Skia.SKCanvas qualified as SKCanvas
-import Skia.SKFontManager qualified as SKFontManager
-import Skia.SKPaint qualified as SKPaint
-import Skia.SKParagraph.Enums as SKParagraph
-import Skia.SKParagraph.FontCollection qualified as FontCollection
-import Skia.SKParagraph.Objects
-import Skia.SKParagraph.Paragraph qualified as Paragraph
-import Skia.SKParagraph.ParagraphBuilder qualified as ParagraphBuilder
-import Skia.SKParagraph.ParagraphStyle qualified as ParagraphStyle
-import Skia.SKParagraph.TextStyle qualified as TextStyle
-import Skia.SKUnicode qualified as SKUnicode
+import Skia.SkCanvas qualified as SkCanvas
+import Skia.SkColor
+import Skia.SkFontMgr qualified as SkFontMgr
+import Skia.SkPaint qualified as SkPaint
+import Skia.SkParagraph.DartTypes qualified as ParagraphEnums
+import Skia.SkParagraph.FontCollection qualified as FontCollection
+import Skia.SkParagraph.Paragraph qualified as Paragraph
+import Skia.SkParagraph.ParagraphBuilder qualified as ParagraphBuilder
+import Skia.SkParagraph.ParagraphStyle qualified as ParagraphStyle
+import Skia.SkParagraph.TextStyle qualified as TextStyle
+import Skia.SkUnicode.SkUnicode qualified as SkUnicode
 
 {-
 #########################################################
@@ -48,20 +45,20 @@ multilingualLoremIpsum =
   |]
 
 main :: IO ()
-main = runDemoCanvasWindowApp "SKParagraph demo" (V2 800 600) \window obtainCanvas -> do
+main = runDemoCanvasWindowApp "SkParagraph demo" (V2 800 600) \window obtainCanvas -> do
   -- Setup colors
-  (_, bgPaint) <- SKPaint.create
-  SKPaint.setColorRGBA bgPaint (RGBA 1.0 1.0 0.0 1.0) Nothing
+  (_, bgPaint) <- SkPaint.create
+  SkPaint.setColorRGBA bgPaint (RGBA 1.0 1.0 0.0 1.0) Nothing
 
-  (_, fgPaint) <- SKPaint.create
-  SKPaint.setColorRGBA fgPaint (RGBA 0.0 0.0 0.0 1.0) Nothing
+  (_, fgPaint) <- SkPaint.create
+  SkPaint.setColorRGBA fgPaint (RGBA 0.0 0.0 0.0 1.0) Nothing
 
-  (_, rectPaint) <- SKPaint.create
-  SKPaint.setColorRGBA fgPaint (RGBA 1.0 0.0 0.0 1.0) Nothing
-  SKPaint.setStrokeWidth rectPaint 1
-  SKPaint.setStyle rectPaint SKPaintStyle'Stroke
+  (_, rectPaint) <- SkPaint.create
+  SkPaint.setColorRGBA fgPaint (RGBA 1.0 0.0 0.0 1.0) Nothing
+  SkPaint.setStrokeWidth rectPaint 1
+  SkPaint.setStyle rectPaint SkPaint.Style'Stroke
 
-  (_, unicode) <- SKUnicode.createAutoDetect
+  (_, unicode) <- SkUnicode.createAutoDetect
 
   -- Setup paragraph
   (_, defaultStyle) <- TextStyle.createEmpty
@@ -71,9 +68,9 @@ main = runDemoCanvasWindowApp "SKParagraph demo" (V2 800 600) \window obtainCanv
   TextStyle.setFontSize defaultStyle 16
 
   (_, paraStyle) <- ParagraphStyle.createEmpty
-  (_, fontmgr) <- SKFontManager.createByFontconfig
+  (_, fontmgr) <- SkFontMgr.createByFontconfig
   ParagraphStyle.setTextStyle paraStyle defaultStyle
-  ParagraphStyle.setTextAlign paraStyle SKParagraph.TextAlign'Justify
+  ParagraphStyle.setTextAlign paraStyle ParagraphEnums.TextAlign'Justify
 
   (_, fontcol) <- FontCollection.createEmpty
   FontCollection.setDefaultFontManager fontcol fontmgr []
@@ -90,17 +87,17 @@ main = runDemoCanvasWindowApp "SKParagraph demo" (V2 800 600) \window obtainCanv
 
     (canvas, flushCanvas) <- obtainCanvas
 
-    (winW, winH) <- liftIO $ GLFW.getWindowSize window
+    (winW, _winH) <- liftIO $ GLFW.getWindowSize window
     (mouseX, mouseY) <- liftIO $ GLFW.getCursorPos window
 
     runResourceT do
-      SKCanvas.clearRGBA canvas (RGBA 1.0 1.0 1.0 1.0)
+      SkCanvas.clearRGBA canvas (RGBA 1.0 1.0 1.0 1.0)
 
       Paragraph.layout para (fromIntegral winW)
       Just glyphInfo <- Paragraph.getClosestGlyphClusterAt para (V2 (realToFrac mouseX) (realToFrac mouseY))
 
       Paragraph.paintWithCanvas para canvas (V2 0 0)
-      SKCanvas.drawRect canvas glyphInfo.bounds rectPaint
+      SkCanvas.drawRect canvas glyphInfo.bounds rectPaint
 
     liftIO $ flushCanvas
     liftIO $ GLFW.swapBuffers window

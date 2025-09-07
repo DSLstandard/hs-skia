@@ -1,25 +1,37 @@
 -- | Internal utilities used for generating boilerplate using template-haskell.
 module Skia.Internal.THUtils (
-  qGenerateSKEnum,
-  qGenerateSKObject,
-  qGenerateFakeSKObject,
+  qGenerateSkEnum,
+  qGenerateSkObject,
+  qGatherInlineSkObjectEntries,
+  formInlineCppTypePairs,
 )
 where
 
 import Control.Monad
+import Data.Data
 import Data.Foldable
 import Data.Functor
+import Data.IntMap qualified as IntMap
+import Data.Sequence qualified as Seq
 import Data.Text qualified as T
+import Data.Traversable
+import Language.C.Inline.Cpp qualified as C
+import Language.C.Types (cIdentifierFromString)
+import Language.C.Types.Parse (CIdentifier)
 import Language.Haskell.Exts.Extension qualified as Extension
 import Language.Haskell.Exts.Parser
 import Language.Haskell.Meta.Parse
 import Language.Haskell.TH as TH
+import Language.Haskell.TH.Quote
 import Language.Haskell.TH.Syntax as TH
 import NeatInterpolation
 import Skia.Core
 
 appsT :: TH.Type -> [TH.Type] -> TH.Type
-appsT = foldl AppT
+appsT = foldl' AppT
+
+apps :: Exp -> [Exp] -> Exp
+apps = foldl' AppE
 
 mkPromotedListT :: [Type] -> Type
 mkPromotedListT [] = PromotedNilT
@@ -36,15 +48,6 @@ defParseMode =
     , Extension.MultiParamTypeClasses
     ]
 
-parseSingleDecWithMode :: ParseMode -> String -> Either String Dec
-parseSingleDecWithMode parseMode source = do
-  result <- parseDecsWithMode parseMode source
-  case result of
-    [dec] -> do
-      pure dec
-    decs -> do
-      Left $ "expects 1 Dec is returned, but got " <> show (length decs) <> " decs"
-
 parseSourceOrDie :: (String -> Either String a) -> T.Text -> Q a
 parseSourceOrDie parserFunc source = do
   let result = parserFunc (T.unpack source)
@@ -54,13 +57,11 @@ parseSourceOrDie parserFunc source = do
     Right result -> do
       pure result
 
-renderType :: Type -> T.Text
-renderType ty = T.pack $ pprint $ ParensT ty
-
--- | Helper structure used by 'qGenerateSKEnum'
+-- | Helper structure used by 'qGenerateSkEnum'
 data EnumValueEntry = EnumValueEntry
   { hsValueName :: Name
-  , cValueName :: Name
+  , cSymbol :: String
+  , cValueExp :: Exp
   , docstring :: T.Text
   }
 
@@ -69,12 +70,12 @@ data EnumValueEntry = EnumValueEntry
 -- renderName :: Name -> T.Text
 -- renderName n = T.pack $ pprint n
 
-{- | Generates 1) the data declaration, and 2) instance SKEnum of a C enum type.
+{- | Generates 1) the data declaration, and 2) instance SkEnum of a C enum type.
 
 Example usage:
 
 @
-\$( qGenerateSKEnum
+\$( qGenerateSkEnum
     \"SKPointMode\"
     ''Sk_point_mode
     "Docstring about Sk_point_mode"
@@ -95,39 +96,43 @@ data SKPointMode
     | SKPointMode'Polygon
     deriving (Show, Eq, Ord, Enum, Bounded)
 
-instance SKEnum where
-    marshalSKEnum SKPointMode'Points = POINTS_SK_POINT_MODE
-    marshalSKEnum SKPointMode'Lines = LINES_SK_POINT_MODE
-    marshalSKEnum SKPointMode'Polygon = POLYGON_SK_POINT_MODE
+instance SkEnum where
+    marshalSkEnum SKPointMode'Points = POINTS_SK_POINT_MODE
+    marshalSkEnum SKPointMode'Lines = LINES_SK_POINT_MODE
+    marshalSkEnum SKPointMode'Polygon = POLYGON_SK_POINT_MODE
 
-    unmarshalSKEnum POINTS_SK_POINT_MODE = Just SKPointMode'Points
-    unmarshalSKEnum LINES_SK_POINT_MODE = Just SKPointMode'Lines
-    unmarshalSKEnum POLYGON_SK_POINT_MODE = Just SKPointMode'Polygon
-    unmarshalSKEnum _ = Nothing
+    unmarshalSkEnum POINTS_SK_POINT_MODE = Just SKPointMode'Points
+    unmarshalSkEnum LINES_SK_POINT_MODE = Just SKPointMode'Lines
+    unmarshalSkEnum POLYGON_SK_POINT_MODE = Just SKPointMode'Polygon
+    unmarshalSkEnum _ = Nothing
 @
 -}
-qGenerateSKEnum ::
+qGenerateSkEnum ::
   -- | Haskell enum name string
   String ->
-  -- | Bindings enum name
-  Name ->
   -- | Optional docstring of the enum datatype (use "" to indicate no
   -- docstring))
   T.Text ->
-  -- | Pairs of (Haskell enum value name string, Bindings enum value name,
-  -- Optional docstring of the enum value (use "" to indicate no docstring))
-  [(String, Name, T.Text)] ->
+  -- | Pairs of (Haskell enum value name string, C symbol, Optional docstring of
+  -- the enum value (use "" to indicate no docstring))
+  [(String, String, T.Text)] ->
   DecsQ
-qGenerateSKEnum hsEnumNameStr cEnumName datatypeDocstring inPairs = do
+qGenerateSkEnum hsEnumNameStr datatypeDocstring inPairs = do
   let
     hsEnumName = mkName hsEnumNameStr
-    entries =
-      inPairs <&> \(hsValueNameStr, cValueName, docstring) ->
-        EnumValueEntry
-          { hsValueName = mkName (hsEnumNameStr <> "'" <> hsValueNameStr)
-          , cValueName
-          , docstring
-          }
+
+  entries <- for inPairs \(hsValueNameStr, cSymbol, docstring) -> do
+    cValueExp <- quoteExp C.pure ("int { (int) " <> cSymbol <> " }")
+    pure EnumValueEntry
+      { hsValueName = mkName (hsEnumNameStr <> "'" <> hsValueNameStr)
+      , cSymbol = cSymbol
+      , cValueExp = cValueExp
+      , docstring = T.unlines
+          [ docstring
+          , ""
+          , "C enum value: @" <> T.pack cSymbol <> "@"
+          ]
+      }
 
   let
     enumDerivingStock =
@@ -140,15 +145,31 @@ qGenerateSKEnum hsEnumNameStr cEnumName datatypeDocstring inPairs = do
     enumAdtDec = DataD [] hsEnumName [] Nothing enumCons [enumDerivingStock]
 
   let
-    skEnumType = appsT (ConT ''SKEnum) [ConT hsEnumName, ConT cEnumName]
+    skEnumType = appsT (ConT ''SkEnum) [ConT hsEnumName, ConT (mkName "CInt")]
 
-    skEnumMarshal = FunD 'marshalSKEnum do
-      EnumValueEntry{hsValueName, cValueName} <- entries
-      pure $ Clause [ConP hsValueName [] []] (NormalB (ConE cValueName)) []
+    skEnumMarshal = FunD 'marshalSkEnum do
+      EnumValueEntry{hsValueName, cValueExp} <- entries
+      pure $ Clause [ConP hsValueName [] []] (NormalB cValueExp) []
 
-    skEnumUnmarshal = FunD 'unmarshalSKEnum do
-      EnumValueEntry{hsValueName, cValueName} <- entries
-      pure $ Clause [ConP cValueName [] []] (NormalB (ConE 'Just `AppE` ConE hsValueName)) []
+    skEnumUnmarshal = FunD 'unmarshalSkEnum do
+      let
+        -- Creates an IntMap as a lookup table
+        intmapPairs = ListE do
+          EnumValueEntry{hsValueName, cValueExp} <- entries
+          pure $ TupE [Just (AppE (VarE 'fromIntegral) cValueExp), Just $ ConE hsValueName]
+        intmap = AppE (VarE 'IntMap.fromList) intmapPairs
+        intmapName = mkName "lookuptable"
+
+        whereClause = FunD intmapName [Clause [] (NormalB intmap) []]
+
+        inputName = mkName "input"
+
+        unmarshalClause = Clause
+          [VarP inputName]
+          (NormalB (apps (VarE 'IntMap.lookup) [AppE (VarE 'fromIntegral) (VarE inputName), VarE intmapName]))
+          [whereClause]
+
+      [unmarshalClause]
 
     skEnumInstanceDec = InstanceD Nothing [] skEnumType [skEnumMarshal, skEnumUnmarshal]
 
@@ -167,39 +188,6 @@ qGenerateSKEnum hsEnumNameStr cEnumName datatypeDocstring inPairs = do
         TH.putDoc (TH.DeclDoc hsValueName) (T.unpack docstring)
 
   pure [enumAdtDec, skEnumInstanceDec]
-
-createNewType :: T.Text -> T.Text -> Type -> DecQ
-createNewType name project referencedType = do
-  let ty = renderType referencedType
-  parseSourceOrDie
-    (parseSingleDecWithMode defParseMode)
-    [text|
-            newtype ${name} = ${name}
-                { ${project} :: Ptr ${ty}
-                }
-                deriving (Show)
-        |]
-
-createPtrNewTypeInstance :: T.Text -> T.Text -> Type -> DecQ
-createPtrNewTypeInstance name project aType = do
-  let ty = renderType aType
-  parseSourceOrDie
-    (parseSingleDecWithMode defParseMode)
-    [text|
-            instance PtrNewType ${name} ${ty} where
-                fromPtr = ${name}
-                ptr = ${project}
-        |]
-
-createSKObjectInstance :: T.Text -> T.Text -> DecQ
-createSKObjectInstance name project = do
-  parseSourceOrDie
-    (parseSingleDecWithMode defParseMode)
-    [text|
-            instance SKObject ${name} where
-                fromAnyPtr = ${name} . castPtr
-                toAnyPtr = castPtr . ${project}
-        |]
 
 {- | Example usage:
 
@@ -261,78 +249,81 @@ createClassExtends cls parents = do
     , isTypeAliasDec
     ]
 
-qGenerateSKObject ::
+data SkObjectEntry = SkObjectEntry
+  { cSymbol :: String
+  -- ^ C symbol name, e.g. @skia::textlayout::Paragraph@
+  , hsName :: Name
+  -- ^ Haskell newtype name
+  , cName :: Name
+  -- ^ C opaque type name
+  --
+  -- Consider that a SkObject newtype is defined as the following:
+  --
+  -- @
+  -- data <cName> -- Opaque ADT
+  --
+  -- newtype <hsName> = <hsName> { un<hsName> :: Ptr <cName> }
+  -- @
+  }
+
+-- | Internal state of THUtils. Used to create other utilities.
+data THUtilsState = THUtilsState
+  { objectEntries :: Seq.Seq SkObjectEntry
+  }
+  deriving (Typeable)
+
+getTHUtilsState :: Q THUtilsState
+getTHUtilsState = do
+  st <- getQ @THUtilsState
+  case st of
+    Nothing -> do
+      -- Returns the default state in the beginning
+      pure THUtilsState
+        { objectEntries = Seq.empty
+        }
+    Just st -> do
+      pure st
+
+putTHUtilsState :: THUtilsState -> Q ()
+putTHUtilsState = putQ @THUtilsState
+
+modifyTHUtilsState :: (THUtilsState -> THUtilsState) -> Q ()
+modifyTHUtilsState f = do
+  st <- getTHUtilsState
+  putTHUtilsState (f st)
+
+registerSkObjectEntry :: SkObjectEntry -> Q ()
+registerSkObjectEntry entry = do
+  modifyTHUtilsState \st ->
+    st{objectEntries = objectEntries st Seq.|> entry}
+
+qGenerateSkObject ::
+  -- | C symbol
+  String ->
   -- | Haskell object name string
   String ->
-  -- | Bindings object name
-  Name ->
   -- | Superclasses
   [Name] ->
   -- | Optional docstring of the enum datatype (use "" to indicate no
   -- docstring))
   T.Text ->
   DecsQ
-qGenerateSKObject nameStr cObjName superClasses docstring = do
-  let name = T.pack nameStr
-  let project = "un" <> name
+qGenerateSkObject cSymbol (T.pack -> hsNameStr) superClasses docstring = do
+  -- NOTE: We are using T.Text only because NeatInterpolation only allows text
+  -- parameters.
+  let hsName :: Name = mkName (T.unpack hsNameStr)
 
-  -- ### Add docstrings
-  --
-  -- The generated definitions must be in-scope first, so addModFinalizer is
-  -- necessary.
-  TH.addModFinalizer do
-    -- Docstrings for the newtype declaration
-    unless (T.null docstring) do
-      TH.putDoc (TH.DeclDoc (mkName nameStr)) (T.unpack docstring)
+  let hsNameProjectorStr :: T.Text = "un" <> hsNameStr
 
-  sequenceA
-    [ createNewType name project (ConT cObjName)
-    , createPtrNewTypeInstance name project (ConT cObjName)
-    , createSKObjectInstance name project
-    ]
-    <> createClassExtends (mkName nameStr) superClasses
+  let cNameStr :: T.Text = "C'" <> hsNameStr
+  let cName :: Name = mkName (T.unpack cNameStr)
 
-{- | Generates a "fake" SKObject. Specifically:
-
-@
-\$(qGenerateFakeSKObject \"SKStreamAsset\" [''SKStreamAsset])
-@
-
-... generates the following:
-
-@
-newtype SKStreamMemory = SKStreamAsset
-    { unSKStreamMemory :: Ptr ()
-        -- NOTE: The referenced type is unimportant. We put () here as a
-        -- placeholder.
+  registerSkObjectEntry SkObjectEntry
+    { cSymbol = cSymbol
+    , hsName = hsName
+    , cName = cName
     }
 
--- NOTE: Compared to \'qGenerateSKObject\', \'qGenerateFakeSKObject\' does not
--- generate a \'PtrNewType\' instance.
---
--- This prevents use 'Skia.Types.Core.useObj' on fake SKObjects because
--- there is never a corresponding Mono Skia C type.
-
-instance SKObject SKStreamMemory where
-    ...
-
-type instance ParentTypes SKStreamMemory = '[SKStreamAsset]
-type IsSKStreamMemory = IsSubclassOf SKStreamMemory
-@
--}
-qGenerateFakeSKObject ::
-  -- | Haskell object name string
-  String ->
-  -- | Superclasses
-  [Name] ->
-  -- | Optional docstring of the enum datatype (use "" to indicate no
-  -- docstring))
-  T.Text ->
-  DecsQ
-qGenerateFakeSKObject nameStr superClasses docstring = do
-  let name = T.pack nameStr
-  let project = "un" <> name
-
   -- ### Add docstrings
   --
   -- The generated definitions must be in-scope first, so addModFinalizer is
@@ -340,10 +331,55 @@ qGenerateFakeSKObject nameStr superClasses docstring = do
   TH.addModFinalizer do
     -- Docstrings for the newtype declaration
     unless (T.null docstring) do
-      TH.putDoc (TH.DeclDoc (mkName nameStr)) (T.unpack docstring)
+      TH.putDoc (TH.DeclDoc hsName) (T.unpack docstring)
 
-  sequenceA
-    [ createNewType name project (TupleT 0)
-    , createSKObjectInstance name project
-    ]
-    <> createClassExtends (mkName nameStr) superClasses
+
+  decs1 <- parseSourceOrDie
+    (parseDecsWithMode defParseMode)
+    [text|
+      data ${cNameStr}
+
+      newtype ${hsNameStr} = ${hsNameStr}
+        { ${hsNameProjectorStr} :: Ptr ${cNameStr}
+        }
+        deriving (Show)
+
+      instance PtrNewType ${hsNameStr} ${cNameStr} where
+        fromPtr = ${hsNameStr}
+        ptr = ${hsNameProjectorStr}
+
+      instance SkObject ${hsNameStr} where
+        fromAnyPtr = ${hsNameStr} . castPtr
+        toAnyPtr = castPtr . ${hsNameProjectorStr}
+    |]
+
+  decs2 <- createClassExtends hsName superClasses
+
+  pure (decs1 <> decs2)
+
+-- | Creates a C.cppTypePairs
+qGatherInlineSkObjectEntries :: Q Exp
+qGatherInlineSkObjectEntries = do
+  st <- getTHUtilsState
+  let
+    entries = st.objectEntries
+    list =
+      ListE $
+        toList entries <&> \entry ->
+          TupE
+            [ Just $ LitE (StringL entry.cSymbol)
+            , Just $ LitE (StringL (showName entry.cName))
+            ]
+  pure $ list
+
+formInlineCppTypePairs :: [(String, String)] -> C.Context
+formInlineCppTypePairs pairs =
+  C.cppTypePairs $
+    pairs <&> \(cSymbol, cNameStr) ->
+      (mkCppIdentifier cSymbol, pure $ ConT $ mkName cNameStr)
+  where
+  mkCppIdentifier :: String -> CIdentifier
+  mkCppIdentifier s = 
+    case cIdentifierFromString True s of
+      Left err -> error $ "CIdentifier fromString: invalid string " ++ show s ++ "\n" ++ err
+      Right x -> x

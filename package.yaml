@@ -1,6 +1,3 @@
-verbatim:
-  cabal-version: ">=1.10"
-
 name: skia
 author: DSLstandard
 maintainer: qgeneral35@gmail.com
@@ -73,36 +70,11 @@ flags:
       little runtime cost, thus it is recommended to leave this flag on.
     default: true
     manual: true
-  use-skia-capi-shared-lib:
-    description: >
-      A flag for developers. Normal users may ignore this.
-      When false (the default), @skia_capi@ is built as a static library and is
-      linked statically to hs-skia.
-      When true, @skia_capi@ is built as a shared library WITH ALL SKIA STATIC
-      LIBRARIES LINKED. The @skia_capi@ shared library is then dynamically
-      linked to hs-skia. The purpose of this is to enable running `cabal repl
-      skia` for developing hs-skia, as `cabal repl` can only load C shared
-      libraries.
-    default: false
-    manual: true
 
 extra-source-files:
-  - cbits/**/*
-  - cbits_cmake/CMakeLists.txt
-
-# build-type: Custom (hpack also sets it if the 'custom-setup' section is present)
-custom-setup:
-  dependencies:
-    - base
-    - Cabal >=1.4 && <2.1
-    - directory <1.4
-    - filepath <1.5
-    - optics-core
-    - optics-th
+  - fake_skia_headers/**/*
 
 library:
-  build-tools:
-    - hsc2hs
   ghc-options:
     # See https://github.com/tfausak/imp?tab=readme-ov-file#recommended-usage
     -fplugin=Imp
@@ -111,68 +83,53 @@ library:
     - base
     - bcp47
     - bytestring
+    - containers
     - haskell-src-exts
     - haskell-src-meta
     - imp ^>= 1.0.0.0 # About 'imp', see https://taylor.fausak.me/2024/03/31/alias-current-module/
+    - inline-c
+    - inline-c-cpp
     - linear
+    - managed
     - neat-interpolation
     - resourcet
-    - storable-offset
     - template-haskell
     - text
     - time
     - vector
-    - managed
   source-dirs: src/
   pkg-config-dependencies:
     # The pkg-config pf 'skia' tells Cabal the library path of Skia and also has
     # the -lskia flag, but it does not link the other Skia libraries like
     # 'skottie', 'skparagraph', etc.
     - skia
-  include-dirs:
-    - cbits/
-    - cbits/fake_headers
   when:
     - condition: flag(enable-skia-assertions)
       cpp-options: -DHS_SKIA_SKIA_ASSERTIONS_ENABLED
     
-    - condition: "!flag(use-skia-capi-shared-lib)"
-      extra-libraries:
-        # Required for C++ code to avoid undefined reference errors
-        - stdc++
 
-        # Skia shared libraries to link.
-        #
-        # Built executables depending on hs-skia will automatically link to the necessary
-        # Skia shared libraries listed here. See cbits_cmake/CMakeLists.txt to learn
-        # what to link.
-        - skia
-        - skottie
-        - skparagraph
-        - sksg
-        - skshaper
-        - skunicode_core
-        - skunicode_icu # TODO: Add other SkUnicode backends too, or create a package flag for each Skia SKUnicode backend.
-        - svg
+  include-dirs:
+    # Some Skia headers include hidden headers... so we are copying those hidden headers here.
+    - fake_skia_headers
+  extra-libraries:
+    # Required for C++ code to avoid undefined reference errors
+    - stdc++
 
-        - skia_capi_static
-
-    - condition: flag(use-skia-capi-shared-lib)
-      extra-libraries:
-        # N.B. We don't need to list all the Skia libraries here because
-        # skia_capi_shared already links to them. We will be linked to those
-        # Skia shared libraries transitively.
-        - skia_capi_shared
+    # Skia shared libraries to link.
+    #
+    # Built executables depending on hs-skia will automatically link to the necessary
+    # Skia shared libraries listed here. See cbits_cmake/CMakeLists.txt to learn
+    # what to link.
+    - skia
+    - skottie
+    - skparagraph
+    - sksg
+    - skshaper
+    - skunicode_core
+    - skunicode_icu # TODO: Add other SkUnicode backends too, or create a package flag for each Skia SKUnicode backend.
+    - svg
 
 executables:
-  demo-raster-example-bindings-only:
-    source-dirs: demos/
-    main: DemoRasterExampleBindingsOnly.hs
-    other-modules: []
-    dependencies:
-      - base
-      - skia
-
   demo-raster-example:
     source-dirs: demos/
     main: DemoRasterExample.hs

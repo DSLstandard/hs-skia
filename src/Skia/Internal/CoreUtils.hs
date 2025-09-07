@@ -18,7 +18,7 @@ import GHC.Stack
 import Control.Monad
 #endif
 
--- | Acquires an SKObject by acquiring its pointer.
+-- | Acquires an SkObject by acquiring its pointer.
 --
 -- The acquired pointer is assumed to never be null.
 --
@@ -28,24 +28,24 @@ import Control.Monad
 --
 -- You may throw arbitrary errors in the function that acquires the resource,
 -- even when the acquired pointer is null.
-allocateSKObjectNeverNull ::
+allocateSkObjectNeverNull ::
 #ifdef HS_SKIA_SKIA_ASSERTIONS_ENABLED
-  (MonadResource m, SKObject s, PtrNewType s a, HasCallStack) =>
+  (MonadResource m, SkObject s, PtrNewType s a, HasCallStack) =>
 #else
-  (MonadResource m, SKObject s, PtrNewType s a) =>
+  (MonadResource m, SkObject s, PtrNewType s a) =>
 #endif
   -- | Acquire
   IO (Ptr a) ->
   -- | Release
   (Ptr a -> IO ()) ->
   m (ReleaseKey, s)
-allocateSKObjectNeverNull acquire release = do
+allocateSkObjectNeverNull acquire release = do
   allocate
     ( do
       p <- acquire
 #ifdef HS_SKIA_SKIA_ASSERTIONS_ENABLED
       when (p == nullPtr) do
-        Prelude.error "acquireSKObjectNeverNull got nullptr. This is a bug of this Haskell library."
+        Prelude.error "acquireSkObjectNeverNull got nullptr. This is a bug of this Haskell library."
 #endif
       pure $ fromPtr p
     )
@@ -53,28 +53,28 @@ allocateSKObjectNeverNull acquire release = do
       release (ptr obj)
     )
 
--- | Like 'allocateSKObjectNeverNull' but release takes in the acquired
--- SKObject instead of its pointer.
+-- | Like 'allocateSkObjectNeverNull' but release takes in the acquired
+-- SkObject instead of its pointer.
 --
 -- This function is occasionally useful.
-allocateSKObjectNeverNull' ::
+allocateSkObjectNeverNull' ::
 #ifdef HS_SKIA_SKIA_ASSERTIONS_ENABLED
-  (MonadResource m, SKObject s, PtrNewType s a, HasCallStack) =>
+  (MonadResource m, SkObject s, PtrNewType s a, HasCallStack) =>
 #else
-  (MonadResource m, SKObject s, PtrNewType s a) =>
+  (MonadResource m, SkObject s, PtrNewType s a) =>
 #endif
   -- | Acquire
   IO (Ptr a) ->
   -- | Release
   (s -> IO ()) ->
   m (ReleaseKey, s)
-allocateSKObjectNeverNull' acquire release = do
+allocateSkObjectNeverNull' acquire release = do
   allocate
     ( do
       p <- acquire
 #ifdef HS_SKIA_SKIA_ASSERTIONS_ENABLED
       when (p == nullPtr) do
-        Prelude.error "acquireSKObjectNeverNull got nullptr. This is a bug of this Haskell library."
+        Prelude.error "acquireSkObjectNeverNull got nullptr. This is a bug of this Haskell library."
 #endif
       pure $ fromPtr p
     )
@@ -82,10 +82,10 @@ allocateSKObjectNeverNull' acquire release = do
       release obj
     )
 
--- | Like 'allocateSKObjectNeverNull', but when the acquired pointer is null, a
+-- | Like 'allocateSkObjectNeverNull', but when the acquired pointer is null, a
 -- 'SkiaError' error is thrown with the specified error message.
-allocateSKObjectOrErrorIfNull :: 
-  (MonadResource m, SKObject s, PtrNewType s a) =>
+allocateSkObjectOrErrorIfNull :: 
+  (MonadResource m, SkObject s, PtrNewType s a) =>
   -- | Error message
   T.Text -> 
   -- | Acquire
@@ -93,7 +93,7 @@ allocateSKObjectOrErrorIfNull ::
   -- | Release
   (Ptr a -> IO ()) ->
   m (ReleaseKey, s)
-allocateSKObjectOrErrorIfNull ~errmsg acquire release =
+allocateSkObjectOrErrorIfNull ~errmsg acquire release =
   allocate
     ( do
       p <- acquire
@@ -106,12 +106,12 @@ allocateSKObjectOrErrorIfNull ~errmsg acquire release =
     )
 
 
--- | Like 'allocateSKObjectOrErrorIfNull' but release takes in the acquired
--- SKObject instead of its pointer.
+-- | Like 'allocateSkObjectOrErrorIfNull' but release takes in the acquired
+-- SkObject instead of its pointer.
 --
 -- This function is occasionally useful.
-allocateSKObjectOrErrorIfNull' :: 
-  (MonadResource m, SKObject s, PtrNewType s a) =>
+allocateSkObjectOrErrorIfNull' :: 
+  (MonadResource m, SkObject s, PtrNewType s a) =>
   -- | Error message
   T.Text -> 
   -- | Acquire
@@ -119,7 +119,7 @@ allocateSKObjectOrErrorIfNull' ::
   -- | Release
   (s -> IO ()) ->
   m (ReleaseKey, s)
-allocateSKObjectOrErrorIfNull' ~errmsg acquire release =
+allocateSkObjectOrErrorIfNull' ~errmsg acquire release =
   allocate
     ( do
       p <- acquire
@@ -132,12 +132,12 @@ allocateSKObjectOrErrorIfNull' ~errmsg acquire release =
     )
 
 
--- | Like 'unmarshalSKEnum' but dies with an 'error' if the input enum cannot be
+-- | Like 'unmarshalSkEnum' but dies with an 'error' if the input enum cannot be
 -- unmarshalled correctly.
-unmarshalSKEnumOrDie :: forall a s m. (Show a, Typeable s, MonadIO m, SKEnum s a, HasCallStack
+unmarshalSkEnumOrDie :: forall s a m. (Show a, Typeable s, MonadIO m, SkEnum s a, HasCallStack
   ) => a -> m s
-unmarshalSKEnumOrDie a = liftIO do
-  case unmarshalSKEnum a of
+unmarshalSkEnumOrDie a = liftIO do
+  case unmarshalSkEnum a of
     Just s -> do
       pure s
     Nothing -> do
@@ -145,14 +145,14 @@ unmarshalSKEnumOrDie a = liftIO do
       error $ "Unrecognized '" <> enumName <> "' enum value: " <> show a
 
 -- | TODO: Document 
-allocateSKObjectOrNothingIfNull ::
-  (SKObject s, PtrNewType s a, MonadResource m) =>
+allocateSkObjectOrNothingIfNull ::
+  (SkObject s, PtrNewType s a, MonadResource m) =>
   -- | Acquire
   IO (Ptr a) ->
   -- | Release
   (Ptr a -> IO ()) ->
   m (Maybe (ReleaseKey, s))
-allocateSKObjectOrNothingIfNull acquire release =
+allocateSkObjectOrNothingIfNull acquire release =
   resourceMask \_restore -> do
     p <- liftIO acquire
     if p == nullPtr
@@ -164,14 +164,14 @@ allocateSKObjectOrNothingIfNull acquire release =
 
 
 -- | TODO: Document 
-allocateSKObjectOrNothingIfNull' ::
-  (SKObject s, PtrNewType s a, MonadResource m) =>
+allocateSkObjectOrNothingIfNull' ::
+  (SkObject s, PtrNewType s a, MonadResource m) =>
   -- | Acquire
   IO (Ptr a) ->
   -- | Release
   (s -> IO ()) ->
   m (Maybe (ReleaseKey, s))
-allocateSKObjectOrNothingIfNull' acquire release = do
+allocateSkObjectOrNothingIfNull' acquire release = do
   resourceMask \_restore -> do
     p <- liftIO acquire
     if p == nullPtr

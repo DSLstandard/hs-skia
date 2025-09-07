@@ -21,12 +21,12 @@ ptrOrNull Nothing = nullPtr
 ptrOrNull (Just object) = ptr object
 
 -- | Enum types in the Skia library.
-class SKEnum s a | s -> a where
-  marshalSKEnum :: s -> a
-  unmarshalSKEnum :: a -> Maybe s
+class SkEnum s a | s -> a where
+  marshalSkEnum :: s -> a
+  unmarshalSkEnum :: a -> Maybe s
 
 -- | TODO: Document this
-class SKObject s where
+class SkObject s where
   fromAnyPtr :: forall a. Ptr a -> s
   toAnyPtr :: forall a. s -> Ptr a
 
@@ -35,7 +35,7 @@ class SKObject s where
 -- -- that the exception is thrown *in sync*.
 -- --
 -- -- Therefore, this function cannot be pure.
--- toObject :: (ManagedPtrNewType s a, SKObject s, MonadIO m) => Ptr a -> m s
+-- toObject :: (ManagedPtrNewType s a, SkObject s, MonadIO m) => Ptr a -> m s
 -- toObject ptr = liftIO do
 -- #ifdef HS_SKIA_CHECK_NULLPTR_ENABLED
 --     when (ptr == nullPtr) do
@@ -94,8 +94,8 @@ type TypeError'NotSubclassOf super sub =
 
 -- | TODO: Document this
 type IsSubclassOf super sub =
-  ( SKObject super
-  , SKObject sub
+  ( SkObject super
+  , SkObject sub
   , {-
         Explanation:
 
@@ -108,8 +108,8 @@ type IsSubclassOf super sub =
 
 -- | TODO: Document this
 asA ::
-  ( SKObject super
-  , SKObject sub
+  ( SkObject super
+  , SkObject sub
   , IsSubclassOf super sub
   ) =>
   sub ->

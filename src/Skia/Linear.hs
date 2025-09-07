@@ -1,80 +1,146 @@
 module Skia.Linear where
 
-import Data.Coerce
-import Foreign.C.Types
-import Linear
-import Skia.Bindings
+import Skia.Internal.Prelude
+import Language.C.Inline.Cpp qualified as C
 
--- * Conversion utilities.
+C.context $ C.cppCtx <> cppSkiaObjectTypes
 
-toSKMatrix :: M33 Float -> Sk_matrix
-toSKMatrix
-  ( coerce ->
-      V3
-        (V3 scaleX skewX transX)
-        (V3 skewY scaleY transY)
-        (V3 persp0 persp1 persp2)
-    ) = Sk_matrix{..}
+C.include "core/SkMatrix.h"
+C.include "core/SkM44.h"
 
-fromSKMatrix :: Sk_matrix -> M33 Float
-fromSKMatrix Sk_matrix{..} =
-  coerce $
-    V3
-      (V3 scaleX skewX transX)
-      (V3 skewY scaleY transY)
-      (V3 persp0 persp1 persp2)
+marshalSkMatrix :: M33 Float -> Managed (Ptr C'SkMatrix)
+marshalSkMatrix ( coerce ->
+  V3
+    (V3 scaleX skewX transX)
+    (V3 skewY scaleY transY)
+    (V3 persp0 persp1 persp2)
+  ) = managed $ bracket
+    [C.block| SkMatrix* {
+      auto mat = new SkMatrix;
+      mat->setAll(
+        $(float scaleX), $(float skewX), $(float transX),
+        $(float skewY), $(float scaleY), $(float transY),
+        $(float persp0), $(float persp1), $(float persp2)
+      );
+      return mat;
+    }|]
+    ( \p -> do
+      [C.block|void {
+        delete $(SkMatrix* p);
+      }|]
+    )
 
-toSKMatrix44 :: M44 Float -> Sk_matrix44
-toSKMatrix44
-  ( coerce ->
-      V4
-        (V4 m00 m01 m02 m03)
-        (V4 m10 m11 m12 m13)
-        (V4 m20 m21 m22 m23)
-        (V4 m30 m31 m32 m33)
-    ) = Sk_matrix44{..}
+allocaSkM44 :: Managed (Ptr C'SkM44)
+allocaSkM44 = managed $ bracket
+  [C.block| SkM44* {
+    return new SkM44();
+  }|]
+  ( \p -> do
+    [C.block|void {
+      delete $(SkM44* p);
+    }|]
+  )
 
-fromSKMatrix44 :: Sk_matrix44 -> M44 Float
-fromSKMatrix44 Sk_matrix44{..} =
-  coerce $
-    V4
-      (V4 m00 m01 m02 m03)
-      (V4 m10 m11 m12 m13)
-      (V4 m20 m21 m22 m23)
-      (V4 m30 m31 m32 m33)
+marshalSkM44 :: M44 Float -> Managed (Ptr C'SkM44)
+marshalSkM44 ( coerce ->
+  V4
+    (V4 m0 m1 m2 m3)
+    (V4 m4 m5 m6 m7)
+    (V4 m8 m9 m10 m11)
+    (V4 m12 m13 m14 m15)
+  ) = managed $ bracket
+    [C.block| SkM44* {
+      return new SkM44(
+        $(float m0), $(float m4), $(float m8),  $(float m12),
+        $(float m1), $(float m5), $(float m9),  $(float m13),
+        $(float m2), $(float m6), $(float m10), $(float m14),
+        $(float m3), $(float m7), $(float m11), $(float m15)
+      );
+    }|]
+    ( \p -> do
+      [C.block|void {
+        delete $(SkM44* p);
+      }|]
+    )
 
-fromSKPoint :: Sk_point -> V2 Float
-fromSKPoint Sk_point{..} = coerce (V2 x y)
+peekSkM44 :: MonadIO m => Ptr C'SkM44 -> m (M44 Float)
+peekSkM44 p = evalManaged do
+  vec <- managed $ allocaArray @CFloat 16
+  -- NOTE: SkM44's fMat is private and it is really annoying
+  liftIO [C.block| void {
+    SkM44* p = $(SkM44* p);
+    float* vec = $(float* vec);
+    vec[0] = p->rc(0, 0);
+    vec[1] = p->rc(0, 1);
+    vec[2] = p->rc(0, 2);
+    vec[3] = p->rc(0, 3);
+    vec[4] = p->rc(1, 0);
+    vec[5] = p->rc(1, 1);
+    vec[6] = p->rc(1, 2);
+    vec[7] = p->rc(1, 3);
+    vec[8] = p->rc(2, 0);
+    vec[9] = p->rc(2, 1);
+    vec[10] = p->rc(2, 2);
+    vec[11] = p->rc(2, 3);
+    vec[12] = p->rc(3, 0);
+    vec[13] = p->rc(3, 1);
+    vec[14] = p->rc(3, 2);
+    vec[15] = p->rc(3, 3);
+  }|]
 
-toSKPoint :: V2 Float -> Sk_point
-toSKPoint (coerce -> V2 x y) = Sk_point{..}
+  [m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15] <- liftIO $ peekArray 16 vec
+  pure $ coerce $ V4
+    (V4 m0 m1 m2 m3)
+    (V4 m4 m5 m6 m7)
+    (V4 m8 m9 m10 m11)
+    (V4 m12 m13 m14 m15)
 
-fromSKIPoint :: Sk_ipoint -> V2 Int
-fromSKIPoint Sk_ipoint{..} = fmap fromIntegral (V2 x y)
+allocaSkPoint :: Managed (Ptr C'SkPoint)
+allocaSkPoint = managed $ bracket
+  [C.block| SkPoint* {
+    return new SkPoint();
+  }|]
+  ( \p -> do
+    [C.block|void {
+      delete $(SkPoint* p);
+    }|]
+  )
 
-toSKIPoint :: V2 Int -> Sk_ipoint
-toSKIPoint (fmap fromIntegral -> V2 x y) = Sk_ipoint{..}
+marshalSkPoint :: V2 Float -> Managed (Ptr C'SkPoint)
+marshalSkPoint (coerce -> V2 x y) =
+  managed $ bracket
+    [C.exp| SkPoint* {
+      new SkPoint { .fX = $(float x), .fY = $(float y) }
+    }|]
+    ( \p -> [C.block|void { delete $(SkPoint* p); }|])
 
-fromSKISize :: Sk_isize -> V2 Int
-fromSKISize Sk_isize{..} = fmap fromIntegral (V2 w h)
+peekSkPoint :: MonadIO m => Ptr C'SkPoint -> m (V2 Float)
+peekSkPoint p = liftIO do
+  x <- [C.exp| float { $(SkPoint* p)->fX }|]
+  y <- [C.exp| float { $(SkPoint* p)->fY }|]
+  pure $ coerce $ V2 x y
 
-toSKISize :: V2 Int -> Sk_isize
-toSKISize (fmap fromIntegral -> V2 w h) = Sk_isize{..}
+allocaSkSize :: Managed (Ptr C'SkSize)
+allocaSkSize = managed $ bracket
+  [C.block| SkSize* {
+    return new SkSize();
+  }|]
+  ( \p -> do
+    [C.block|void {
+      delete $(SkSize* p);
+    }|]
+  )
 
-fromSKSize :: Sk_size -> V2 Float
-fromSKSize Sk_size{..} = coerce (V2 w h)
+marshalSkSize :: V2 Float -> Managed (Ptr C'SkSize)
+marshalSkSize (coerce -> V2 w h) =
+  managed $ bracket
+    [C.exp| SkSize* {
+      new SkSize { .fWidth = $(float w), .fHeight = $(float h) }
+    }|]
+    ( \p -> [C.block|void { delete $(SkSize* p); }|])
 
-toSKSize :: V2 Float -> Sk_size
-toSKSize (coerce -> V2 w h) = Sk_size{..}
-
-fromSKPoint3 :: Sk_point3 -> V3 Float
-fromSKPoint3 Sk_point3{..} = coerce (V3 x y z)
-
-toSKPoint3 :: V3 Float -> Sk_point3
-toSKPoint3 (coerce -> V3 x y z) = Sk_point3{..}
-
-fromSKVector :: Sk_vector -> V2 Float
-fromSKVector Sk_point{..} = coerce (V2 x y)
-
-toSKVector :: V2 Float -> Sk_vector
-toSKVector (coerce -> V2 x y) = Sk_point{..}
+peekSkSize :: MonadIO m => Ptr C'SkSize -> m (V2 Float)
+peekSkSize p = liftIO do
+  x <- [C.exp| float { $(SkSize* p)->fWidth }|]
+  y <- [C.exp| float { $(SkSize* p)->fHeight }|]
+  pure $ coerce $ V2 x y

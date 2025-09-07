@@ -5,10 +5,10 @@ import Control.Exception
 -- NOTE: The errors in this module do not correspond to any Google Skia-defined
 -- exceptions. They are for this Haskell library.
 
-newtype UnmarshalSKEnumError = UnmarshalSKEnumError String
+newtype UnmarshalSkEnumError = UnmarshalSkEnumError String
   deriving (Show)
 
-instance Exception UnmarshalSKEnumError
+instance Exception UnmarshalSkEnumError
 
 -- | An internal error of *THIS* Haskell Skia binding library.
 newtype InternalError = InternalError String

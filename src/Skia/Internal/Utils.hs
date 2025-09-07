@@ -1,12 +1,14 @@
 -- | Internal utilities used by other parts of this Haskell library.
 module Skia.Internal.Utils where
 
+import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Managed as Managed
 import Data.ByteString qualified as BS
 import Data.ByteString.Unsafe qualified as BS
 import Data.Coerce
 import Data.Foldable
+import Data.List.NonEmpty qualified as NonEmpty
 import Data.Text qualified as T
 import Data.Text.Foreign qualified
 import Data.Vector.Storable qualified as VS
@@ -100,9 +102,52 @@ used to catch type errors.
 coerceForeignPtr :: (Coercible a b) => ForeignPtr a -> ForeignPtr b
 coerceForeignPtr = castForeignPtr
 
-whenJust :: (Monad m) => Maybe a -> (a -> m ()) -> m ()
-whenJust Nothing _ = pure ()
-whenJust (Just a) f = f a
+-- | 'when' but monadic.
+whenM :: (Monad m) => m Bool -> m () -> m ()
+whenM condition action = do
+  condition <- condition
+  when condition action
+
+-- | 'unless' but monadic.
+unlessM :: (Monad m) => m Bool -> m () -> m ()
+unlessM condition action = do
+  condition <- condition
+  unless condition action
+
+whenJust :: (Applicative m) => Maybe a -> (a -> m ()) -> m ()
+whenJust Nothing _m = pure ()
+whenJust (Just x) m = m x
+
+whenJustM :: (Monad m) => m (Maybe a) -> (a -> m ()) -> m ()
+whenJustM f m = f >>= flip whenJust m
+
+whenNothing :: (Applicative m) => Maybe x -> m () -> m ()
+whenNothing Nothing m = m
+whenNothing (Just _) _m = pure ()
+
+whenNothingM :: (Monad m) => m (Maybe x) -> m () -> m ()
+whenNothingM f m = f >>= flip whenNothing m
+
+whenNotNull :: (Applicative m) => [a] -> (NonEmpty.NonEmpty a -> m ()) -> m ()
+whenNotNull [] _m = pure ()
+whenNotNull (x : xs) m = m (x NonEmpty.:| xs)
+
+whenNotNullM :: (Monad m) => m [a] -> (NonEmpty.NonEmpty a -> m ()) -> m ()
+whenNotNullM f m = f >>= flip whenNotNull m
+
+whenNotNull_ :: (Applicative m) => [a] -> m () -> m ()
+whenNotNull_ [] _m = pure ()
+whenNotNull_ (_ : _) m = m
+
+whenNotNullM_ :: (Monad m) => m [a] -> m () -> m ()
+whenNotNullM_ f m = f >>= flip whenNotNull_ m
+
+whenNull :: (Applicative m) => [x] -> m () -> m ()
+whenNull [] m = m
+whenNull (_ : _) _m = pure ()
+
+whenNullM :: (Monad m) => m [x] -> m () -> m ()
+whenNullM f m = f >>= flip whenNull m
 
 -- * Utils for the @Managed@ monad.
 
