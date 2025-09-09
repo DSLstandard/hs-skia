@@ -11,10 +11,10 @@ import Graphics.UI.GLFW qualified as GLFW
 import Linear
 import Options.Applicative qualified as Opts
 import SharedUtils.MakeDemoApp (runDemoCanvasWindowApp)
-import Skia.Color
-import Skia.SKCanvas qualified as SKCanvas
-import Skia.Skottie.Animation qualified as SkottieAnimation
-import Skia.Skottie.AnimationBuilder qualified as SkottieAnimationBuilder
+import Skia.SkColor
+import Skia.SkCanvas qualified as SkCanvas
+import Skia.Skottie.Animation qualified as Animation
+import Skia.Skottie.AnimationBuilder qualified as AnimationBuilder
 import System.Directory
 import System.Exit
 
@@ -53,11 +53,11 @@ main = do
 startAnimationApp :: FilePath -> IO ()
 startAnimationApp animFilePath = runDemoCanvasWindowApp "DemoSkottieAnimationViewer" (V2 400 400) \window obtainCanvas -> do
   -- Load animation
-  (builderKey, builder) <- SkottieAnimationBuilder.create SkottieAnimationBuilder.defaultCreateFlags
+  (builderKey, builder) <- AnimationBuilder.create AnimationBuilder.defaultBuilderFlags
   (_animKey, anim) <-
-    SkottieAnimationBuilder.buildFromFile builder animFilePath >>= \case
+    AnimationBuilder.buildFromFile builder animFilePath >>= \case
       Nothing -> do
-        liftIO $ putStrLn $ "[!] Error: Cannot build SkottieAnimation from file " <> animFilePath
+        liftIO $ putStrLn $ "[!] Error: Cannot build skottie animation from file " <> animFilePath
         liftIO $ putStrLn $ "[!] Quitting..."
         liftIO $ exitFailure
       Just anim -> do
@@ -65,12 +65,12 @@ startAnimationApp animFilePath = runDemoCanvasWindowApp "DemoSkottieAnimationVie
   release builderKey
 
   -- Print animation info
-  duration <- SkottieAnimation.getDuration anim
-  V2 width height <- SkottieAnimation.getSize anim
-  fps <- SkottieAnimation.getFPS anim
-  inPoint <- SkottieAnimation.getInPoint anim
-  outPoint <- SkottieAnimation.getInPoint anim
-  version <- SkottieAnimation.getVersion anim
+  duration <- Animation.getDuration anim
+  V2 width height <- Animation.getSize anim
+  fps <- Animation.getFPS anim
+  inPoint <- Animation.getInPoint anim
+  outPoint <- Animation.getInPoint anim
+  version <- Animation.getVersion anim
 
   liftIO $ putStrLn "Info about the loaded animation:"
   liftIO $ putStrLn $ "- Duration (seconds): " <> show duration
@@ -90,16 +90,16 @@ startAnimationApp animFilePath = runDemoCanvasWindowApp "DemoSkottieAnimationVie
 
       (canvas, flushCanvas) <- obtainCanvas
 
-      SKCanvas.clearRGBA canvas $ RGBA 1.0 1.0 1.0 1.0
+      SkCanvas.clearRGBA canvas $ RGBA 1.0 1.0 1.0 1.0
 
       nowTime <- liftIO $ Time.getPOSIXTime
       let t = realToFrac (nowTime - startTime) `mod'` duration
-      SkottieAnimation.seekFrameTime anim (realToFrac t) Nothing
-      SkottieAnimation.render
+      Animation.seekFrameTime anim (realToFrac t) Nothing
+      Animation.render
         anim
         canvas
         Nothing
-        SkottieAnimation.defaultRenderFlags
+        Animation.defaultRenderFlags
 
       liftIO $ flushCanvas
       liftIO $ GLFW.swapBuffers window

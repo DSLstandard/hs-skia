@@ -1,4 +1,4 @@
-cabal-version: >=1.10
+cabal-version: 1.12
 
 -- This file has been generated from package.yaml by hpack version 0.36.1.
 --
@@ -11,116 +11,18 @@ author:         DSLstandard
 maintainer:     qgeneral35@gmail.com
 license:        MIT
 license-file:   LICENSE
-build-type:     Custom
+build-type:     Simple
 extra-source-files:
-    cbits/fake_headers/include/private/base/SkAPI.h
-    cbits/fake_headers/include/private/base/SkAssert.h
-    cbits/fake_headers/LICENSE
-    cbits/fake_headers/src/base/SkBitmaskEnum.h
-    cbits/fake_headers/src/base/SkTInternalLList.h
-    cbits/fake_headers/src/base/SkTLazy.h
-    cbits/fake_headers/src/base/SkUTF.h
-    cbits/fake_headers/src/core/SkChecksum.h
-    cbits/fake_headers/src/core/SkLRUCache.h
-    cbits/fake_headers/src/core/SkTHash.h
-    cbits/LICENSE
-    cbits/skia_capi/gr_context.h
-    cbits/skia_capi/sk_bitmap.h
-    cbits/skia_capi/sk_blender.h
-    cbits/skia_capi/sk_canvas.h
-    cbits/skia_capi/sk_codec.h
-    cbits/skia_capi/sk_color.h
-    cbits/skia_capi/sk_colorfilter.h
-    cbits/skia_capi/sk_colorspace.h
-    cbits/skia_capi/sk_data.h
-    cbits/skia_capi/sk_document.h
-    cbits/skia_capi/sk_drawable.h
-    cbits/skia_capi/sk_font.h
-    cbits/skia_capi/sk_fontmgr.h
-    cbits/skia_capi/sk_general.h
-    cbits/skia_capi/sk_graphics.h
-    cbits/skia_capi/sk_image.h
-    cbits/skia_capi/sk_imagefilter.h
-    cbits/skia_capi/sk_maskfilter.h
-    cbits/skia_capi/sk_matrix.h
-    cbits/skia_capi/sk_paint.h
-    cbits/skia_capi/sk_path.h
-    cbits/skia_capi/sk_patheffect.h
-    cbits/skia_capi/sk_picture.h
-    cbits/skia_capi/sk_pixmap.h
-    cbits/skia_capi/sk_region.h
-    cbits/skia_capi/sk_rrect.h
-    cbits/skia_capi/sk_runtimeeffect.h
-    cbits/skia_capi/sk_shader.h
-    cbits/skia_capi/sk_stream.h
-    cbits/skia_capi/sk_string.h
-    cbits/skia_capi/sk_surface.h
-    cbits/skia_capi/sk_svg.h
-    cbits/skia_capi/sk_textblob.h
-    cbits/skia_capi/sk_typeface.h
-    cbits/skia_capi/sk_types.h
-    cbits/skia_capi/sk_vertices.h
-    cbits/skia_capi/skottie_animation.h
-    cbits/skia_capi/skparagraph.h
-    cbits/skia_capi/skresources_resource_provider.h
-    cbits/skia_capi/sksg_invalidation_controller.h
-    cbits/skia_capi/sksvg.h
-    cbits/skia_capi/skunicode.h
-    cbits/src/assert_enum_values.cpp
-    cbits/src/assert_struct_sizeof.cpp
-    cbits/src/common_include_pch.hpp
-    cbits/src/gr_context.cpp
-    cbits/src/sk_bitmap.cpp
-    cbits/src/sk_blender.cpp
-    cbits/src/sk_canvas.cpp
-    cbits/src/sk_codec.cpp
-    cbits/src/sk_color.cpp
-    cbits/src/sk_colorfilter.cpp
-    cbits/src/sk_colorspace.cpp
-    cbits/src/sk_data.cpp
-    cbits/src/sk_document.cpp
-    cbits/src/sk_drawable.cpp
-    cbits/src/sk_font.cpp
-    cbits/src/sk_fontmgr.cpp
-    cbits/src/sk_general.cpp
-    cbits/src/sk_graphics.cpp
-    cbits/src/sk_image.cpp
-    cbits/src/sk_imagefilter.cpp
-    cbits/src/sk_maskfilter.cpp
-    cbits/src/sk_matrix.cpp
-    cbits/src/sk_paint.cpp
-    cbits/src/sk_path.cpp
-    cbits/src/sk_patheffect.cpp
-    cbits/src/sk_picture.cpp
-    cbits/src/sk_pixmap.cpp
-    cbits/src/sk_region.cpp
-    cbits/src/sk_rrect.cpp
-    cbits/src/sk_runtimeeffect.cpp
-    cbits/src/sk_shader.cpp
-    cbits/src/sk_stream.cpp
-    cbits/src/sk_string.cpp
-    cbits/src/sk_surface.cpp
-    cbits/src/sk_svg.cpp
-    cbits/src/sk_textblob.cpp
-    cbits/src/sk_typeface.cpp
-    cbits/src/sk_types_priv.hpp
-    cbits/src/sk_vertices.cpp
-    cbits/src/skottie_animation.cpp
-    cbits/src/skparagraph.cpp
-    cbits/src/skresources_resource_provider.cpp
-    cbits/src/sksg_invalidation_controller.cpp
-    cbits/src/sksvg.cpp
-    cbits/src/skunicode.cpp
-    cbits_cmake/CMakeLists.txt
-
-custom-setup
-  setup-depends:
-      Cabal >=1.4 && <2.1
-    , base
-    , directory <1.4
-    , filepath <1.5
-    , optics-core
-    , optics-th
+    fake_skia_headers/include/private/base/SkAPI.h
+    fake_skia_headers/include/private/base/SkAssert.h
+    fake_skia_headers/LICENSE
+    fake_skia_headers/src/base/SkBitmaskEnum.h
+    fake_skia_headers/src/base/SkTInternalLList.h
+    fake_skia_headers/src/base/SkTLazy.h
+    fake_skia_headers/src/base/SkUTF.h
+    fake_skia_headers/src/core/SkChecksum.h
+    fake_skia_headers/src/core/SkLRUCache.h
+    fake_skia_headers/src/core/SkTHash.h
 
 flag enable-skia-assertions
   description: Enable Haskell IO assertions on the outputs of certain functions in the C++ Skia library. To elaborate, some Skia functions guarantee specific postconditions, and this Haskell binding library typically assumes that these postconditions are never violated and exploits this assumption to perform fast operations, which can fail spectacularly if the postconditions are in fact untrue. Enabling this flag adds simple assertion tests for the postconditions and raises a @SkiaAssertionError@ if any violations are detected. These assertion tests should have very little runtime cost, thus it is recommended to leave this flag on.
@@ -128,116 +30,83 @@ flag enable-skia-assertions
   manual: True
   default: True
 
-flag use-skia-capi-shared-lib
-  description: A flag for developers. Normal users may ignore this. When false (the default), @skia_capi@ is built as a static library and is linked statically to hs-skia. When true, @skia_capi@ is built as a shared library WITH ALL SKIA STATIC LIBRARIES LINKED. The @skia_capi@ shared library is then dynamically linked to hs-skia. The purpose of this is to enable running `cabal repl skia` for developing hs-skia, as `cabal repl` can only load C shared libraries.
-
-  manual: True
-  default: False
-
 library
   exposed-modules:
-      Skia.Bindings
-      Skia.Bindings.Gr_context
-      Skia.Bindings.Sk_bitmap
-      Skia.Bindings.Sk_blender
-      Skia.Bindings.Sk_canvas
-      Skia.Bindings.Sk_codec
-      Skia.Bindings.Sk_color
-      Skia.Bindings.Sk_colorfilter
-      Skia.Bindings.Sk_colorspace
-      Skia.Bindings.Sk_data
-      Skia.Bindings.Sk_document
-      Skia.Bindings.Sk_drawable
-      Skia.Bindings.Sk_font
-      Skia.Bindings.Sk_fontmgr
-      Skia.Bindings.Sk_general
-      Skia.Bindings.Sk_graphics
-      Skia.Bindings.Sk_image
-      Skia.Bindings.Sk_imagefilter
-      Skia.Bindings.Sk_maskfilter
-      Skia.Bindings.Sk_matrix
-      Skia.Bindings.Sk_paint
-      Skia.Bindings.Sk_path
-      Skia.Bindings.Sk_patheffect
-      Skia.Bindings.Sk_picture
-      Skia.Bindings.Sk_pixmap
-      Skia.Bindings.Sk_region
-      Skia.Bindings.Sk_rrect
-      Skia.Bindings.Sk_runtimeeffect
-      Skia.Bindings.Sk_shader
-      Skia.Bindings.Sk_stream
-      Skia.Bindings.Sk_string
-      Skia.Bindings.Sk_surface
-      Skia.Bindings.Sk_svg
-      Skia.Bindings.Sk_textblob
-      Skia.Bindings.Sk_typeface
-      Skia.Bindings.Sk_vertices
-      Skia.Bindings.Skottie_animation
-      Skia.Bindings.Skparagraph
-      Skia.Bindings.Skresources_resource_provider
-      Skia.Bindings.Sksg_invalidation_controller
-      Skia.Bindings.Sksvg
-      Skia.Bindings.Skunicode
-      Skia.Bindings.Types
-      Skia.Color
-      Skia.ColorMatrix
       Skia.Core
-      Skia.Enums
       Skia.Errors
-      Skia.GRBackendRenderTarget
-      Skia.GRDirectContext
-      Skia.GRGlInterface
+      Skia.GrBackendRenderTarget
+      Skia.GrContextOptions
+      Skia.GrDirectContext
+      Skia.GrGLInterface
+      Skia.GrGLTypes
+      Skia.GrTypes
       Skia.Internal.CoreUtils
       Skia.Internal.Prelude
+      Skia.Internal.RawEnums
       Skia.Internal.THUtils
       Skia.Internal.TypeLevelBool
       Skia.Internal.Utils
       Skia.Linear
       Skia.Objects
-      Skia.Rect
-      Skia.SKCanvas
-      Skia.SKColorSpace
-      Skia.SKColorType
-      Skia.SKData
-      Skia.SKFileStream
-      Skia.SKFileWStream
-      Skia.SKFont
-      Skia.SKFontManager
-      Skia.SKFontStyle
-      Skia.SKImage
-      Skia.SKImageEncoder
-      Skia.SKImageInfo
-      Skia.SKMemoryStream
+      Skia.SkAlphaType
+      Skia.SkBlendMode
+      Skia.SkCanvas
+      Skia.SkClipOp
+      Skia.SkColor
+      Skia.SkColorSpace
+      Skia.SkColorType
+      Skia.SkData
+      Skia.SkFileStream
+      Skia.SkFileWStream
+      Skia.SkFont
+      Skia.SkFontMetrics
+      Skia.SkFontMgr
+      Skia.SkFontStyle
+      Skia.SkFontTypes
+      Skia.SkImage
+      Skia.SkImageInfo
+      Skia.SkJpegEncoder
+      Skia.SkMemoryStream
       Skia.Skottie.Animation
       Skia.Skottie.AnimationBuilder
-      Skia.SKPaint
-      Skia.SKParagraph.Enums
-      Skia.SKParagraph.FontCollection
-      Skia.SKParagraph.Internal.Prelude
-      Skia.SKParagraph.Metrics
-      Skia.SKParagraph.Objects
-      Skia.SKParagraph.Paragraph
-      Skia.SKParagraph.ParagraphBuilder
-      Skia.SKParagraph.ParagraphStyle
-      Skia.SKParagraph.StrutStyle
-      Skia.SKParagraph.TextShadow
-      Skia.SKParagraph.TextStyle
-      Skia.SKPath
-      Skia.SKPathEffect
-      Skia.SKPixmap
-      Skia.SKRefCnt
-      Skia.SKRegion
-      Skia.SKRRect
-      Skia.SKSamplingOptions
-      Skia.SKShader
-      Skia.SKString
-      Skia.SKSurface
-      Skia.SKSurfaceProps
-      Skia.SKSvg.Dom
-      Skia.SKSvg.Objects
-      Skia.SKUnicode
-      Skia.SKVersion
-      Skia.SKWStream
+      Skia.Skottie.Internal.Prelude
+      Skia.Skottie.Objects
+      Skia.SkPaint
+      Skia.SkParagraph.DartTypes
+      Skia.SkParagraph.FontCollection
+      Skia.SkParagraph.Internal.Prelude
+      Skia.SkParagraph.Metrics
+      Skia.SkParagraph.Objects
+      Skia.SkParagraph.Paragraph
+      Skia.SkParagraph.ParagraphBuilder
+      Skia.SkParagraph.ParagraphStyle
+      Skia.SkParagraph.StrutStyle
+      Skia.SkParagraph.TextShadow
+      Skia.SkParagraph.TextStyle
+      Skia.SkPath
+      Skia.SkPathEffect
+      Skia.SkPathTypes
+      Skia.SkPixmap
+      Skia.SkPngEncoder
+      Skia.SkRect
+      Skia.SkRefCnt
+      Skia.SkRegion
+      Skia.SkResources.Objects
+      Skia.SkRRect
+      Skia.SkSamplingOptions
+      Skia.SkSG.Objects
+      Skia.SkShader
+      Skia.SkString
+      Skia.SkSurface
+      Skia.SkSurfaceProps
+      Skia.SkSVG.Dom
+      Skia.SkSVG.Internal.Prelude
+      Skia.SkSVG.Objects
+      Skia.SkTileMode
+      Skia.SkUnicode.Objects
+      Skia.SkUnicode.SkUnicode
+      Skia.SkVersion
+      Skia.SkWebpEncoder
   other-modules:
       Paths_skia
   hs-source-dirs:
@@ -291,24 +160,33 @@ library
       ViewPatterns
   ghc-options: -Wall -Wno-name-shadowing -Wno-orphans -fplugin=Imp -fplugin-opt=Imp:--alias=_:ThisModule
   include-dirs:
-      cbits/
-      cbits/fake_headers
+      fake_skia_headers
+  extra-libraries:
+      stdc++
+      skia
+      skottie
+      skparagraph
+      sksg
+      skshaper
+      skunicode_core
+      skunicode_icu
+      svg
   pkgconfig-depends:
       skia
-  build-tools:
-      hsc2hs
   build-depends:
       base
     , bcp47
     , bytestring
+    , containers
     , haskell-src-exts
     , haskell-src-meta
     , imp >=1.0.0.0 && <1.1
+    , inline-c
+    , inline-c-cpp
     , linear
     , managed
     , neat-interpolation
     , resourcet
-    , storable-offset
     , template-haskell
     , text
     , time
@@ -316,21 +194,6 @@ library
   default-language: Haskell2010
   if flag(enable-skia-assertions)
     cpp-options: -DHS_SKIA_SKIA_ASSERTIONS_ENABLED
-  if !flag(use-skia-capi-shared-lib)
-    extra-libraries:
-        stdc++
-        skia
-        skottie
-        skparagraph
-        sksg
-        skshaper
-        skunicode_core
-        skunicode_icu
-        svg
-        skia_capi_static
-  if flag(use-skia-capi-shared-lib)
-    extra-libraries:
-        skia_capi_shared
 
 executable demo-glfw-opengl
   main-is: DemoGLFWOpenGL.hs
@@ -508,63 +371,6 @@ executable demo-raster-example
       base
     , linear
     , resourcet
-    , skia
-  default-language: Haskell2010
-
-executable demo-raster-example-bindings-only
-  main-is: DemoRasterExampleBindingsOnly.hs
-  hs-source-dirs:
-      demos/
-  default-extensions:
-      AllowAmbiguousTypes
-      Arrows
-      BinaryLiterals
-      BlockArguments
-      ConstraintKinds
-      DataKinds
-      DefaultSignatures
-      DeriveAnyClass
-      DeriveFoldable
-      DeriveFunctor
-      DeriveGeneric
-      DeriveTraversable
-      DerivingStrategies
-      DerivingVia
-      DuplicateRecordFields
-      EmptyCase
-      ExplicitForAll
-      FlexibleContexts
-      FlexibleInstances
-      FunctionalDependencies
-      GADTs
-      GeneralizedNewtypeDeriving
-      ImportQualifiedPost
-      LambdaCase
-      LiberalTypeSynonyms
-      MultiParamTypeClasses
-      MultiWayIf
-      NamedFieldPuns
-      OverloadedLabels
-      OverloadedRecordDot
-      OverloadedStrings
-      PartialTypeSignatures
-      PatternSynonyms
-      QuasiQuotes
-      RankNTypes
-      RecordWildCards
-      RecursiveDo
-      ScopedTypeVariables
-      StandaloneDeriving
-      TemplateHaskell
-      TupleSections
-      TypeApplications
-      TypeFamilies
-      TypeOperators
-      UndecidableInstances
-      ViewPatterns
-  ghc-options: -Wall -Wno-name-shadowing -Wno-orphans
-  build-depends:
-      base
     , skia
   default-language: Haskell2010
 

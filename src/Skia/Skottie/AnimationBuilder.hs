@@ -1,14 +1,22 @@
 module Skia.Skottie.AnimationBuilder where
 
-import Control.Monad.Trans.Resource
 import Data.ByteString qualified as BS
-import Data.ByteString.Unsafe qualified as BS
 import Foreign.C.String qualified
-import Skia.Bindings.Skottie_animation
-import Skia.Bindings.Types
-import Skia.Internal.Prelude
+import Skia.Skottie.Internal.Prelude
+import Skia.SkResources.Objects as SkResources
+import Language.C.Inline.Cpp qualified as C
 
-data CreateFlags = CreateFlags
+C.context $ mconcat
+  [ C.cppCtx
+  , cppSkottieObjectTypes
+  , cppSkResourcesObjectTypes
+  , cppSkiaObjectTypes
+  ]
+
+C.include "modules/skottie/include/Skottie.h"
+
+-- | Flags for 'create'.
+data BuilderFlags = BuilderFlags
   { deferImageLoading :: Bool
   -- ^ Normally, all static image frames are resolved at load time via
   -- ImageAsset::getFrame(0).  With this flag, frames are only resolved when
@@ -19,95 +27,145 @@ data CreateFlags = CreateFlags
   }
   deriving (Show, Eq, Ord)
 
-defaultCreateFlags :: CreateFlags
-defaultCreateFlags =
-  CreateFlags
+defaultBuilderFlags :: BuilderFlags
+defaultBuilderFlags =
+  BuilderFlags
     { deferImageLoading = False
     , preferEmbeddedFonts = False
     }
 
-marshalCreateFlags :: CreateFlags -> Skottie_animation_builder_flags
-marshalCreateFlags i =
-  makeBitFlags
-    [ (i.deferImageLoading, DEFER_IMAGE_LOADING_SKOTTIE_ANIMATION_BUILDER_FLAGS)
-    , (i.preferEmbeddedFonts, PREFER_EMBEDDED_FONTS_SKOTTIE_ANIMATION_BUILDER_FLAGS)
-    ]
-
+-- | Creates a new 'AnimationBuilder' instance.
 create ::
   (MonadResource m) =>
-  -- | Additional options. Consider using 'defaultCreateFlags'.
-  CreateFlags ->
-  m (ReleaseKey, SkottieAnimationBuilder)
+  -- | Additional options. Consider using 'defaultBuilderFlags'.
+  BuilderFlags ->
+  m (ReleaseKey, AnimationBuilder)
 create flags =
-  allocateSKObjectNeverNull
-    (skottie_animation_builder_new (marshalCreateFlags flags))
-    skottie_animation_builder_delete
+  allocateSkObjectNeverNull
+    [C.exp| skottie::Animation::Builder* {
+      new skottie::Animation::Builder($(uint32_t flags'))
+    }|]
+    (\p -> [C.block| void { delete $(skottie::Animation::Builder* p); } |])
+  where
+    flags' = 
+      makeBitFlags
+        [ (flags.deferImageLoading, [C.pure| uint32_t { skottie::Animation::Builder::Flags::kDeferImageLoading } |])
+        , (flags.preferEmbeddedFonts, [C.pure| uint32_t { skottie::Animation::Builder::Flags::kPreferEmbeddedFonts } |])
+        ]
 
 data Stats = Stats
   { totalLoadTimeMS :: Float
+  -- ^ Total animation instantiation time in milliseconds
   , jsonParseTimeMS :: Float
+  -- ^ Time spent building a JSON DOM in milliseconds
   , sceneParseTimeMS :: Float
+  -- ^ Time spent constructing the animation scene graph in milliseconds
   , jsonSize :: Int
+  -- ^ Input JSON size in bytes
   , animatorCount :: Int
+  -- ^ Number of dynamically animated properties
   }
   deriving (Show, Eq, Ord)
 
-unmarshalStats :: Skottie_animation_builder_stats -> Stats
-unmarshalStats Skottie_animation_builder_stats{..} =
-  Stats
-    { totalLoadTimeMS = coerce fTotalLoadTimeMS
-    , jsonParseTimeMS = coerce fJsonParseTimeMS
-    , sceneParseTimeMS = coerce fSceneParseTimeMS
-    , jsonSize = fromIntegral fJsonSize
-    , animatorCount = fromIntegral fAnimatorCount
+-- | Returns various animation build stats.
+getStats :: (MonadIO m) => AnimationBuilder -> m Stats
+getStats (ptr -> builder) = evalManaged do
+  fTotalLoadTimeMS <- managed $ alloca @CFloat
+  fJsonParseTimeMS <- managed $ alloca @CFloat
+  fSceneParseTimeMS <- managed $ alloca @CFloat
+  fJsonSize <- managed $ alloca @CSize
+  fAnimatorCount <- managed $ alloca @CSize
+
+  liftIO do
+    [C.block| void {
+      auto stats = $(skottie::Animation::Builder* builder)->getStats();
+      *$(float* fTotalLoadTimeMS) = stats.fTotalLoadTimeMS;
+      *$(float* fJsonParseTimeMS) = stats.fJsonParseTimeMS;
+      *$(float* fSceneParseTimeMS) = stats.fSceneParseTimeMS;
+      *$(size_t* fJsonSize) = stats.fJsonSize;
+      *$(size_t* fAnimatorCount) = stats.fAnimatorCount;
+    }|]
+
+  totalLoadTimeMS <- liftIO $ coerce <$> peek fTotalLoadTimeMS
+  jsonParseTimeMS <- liftIO $ coerce <$> peek fJsonParseTimeMS
+  sceneParseTimeMS <- liftIO $ coerce <$> peek fSceneParseTimeMS
+  jsonSize <- liftIO $ fromIntegral <$> peek fJsonSize
+  animatorCount <- liftIO $ fromIntegral <$> peek fAnimatorCount
+
+  pure Stats
+    { totalLoadTimeMS
+    , jsonParseTimeMS
+    , sceneParseTimeMS
+    , jsonSize
+    , animatorCount
     }
 
-getStats :: (MonadIO m) => SkottieAnimationBuilder -> m Stats
-getStats builder = evalManaged do
-  stats' <- managed alloca
-  liftIO $ skottie_animation_builder_get_stats (ptr builder) stats'
-  peekWith unmarshalStats stats'
+-- | Specify a loader for external resources (images, etc.).
+setResourceProvider :: (MonadIO m, SkResources.IsResourceProvider provider) => AnimationBuilder -> provider -> m ()
+setResourceProvider (ptr -> builder) (ptr . toA SkResources.ResourceProvider -> provider) = liftIO do
+  [C.block| void {
+    $(skottie::Animation::Builder* builder)->setResourceProvider(
+      sk_sp<skresources::ResourceProvider>($(skresources::ResourceProvider* provider)));
+  }|]
 
-setResourceProvider :: (MonadIO m) => SkottieAnimationBuilder -> SKResourcesResourceProvider -> m ()
-setResourceProvider builder provider = liftIO do
-  skottie_animation_builder_set_resource_provider (ptr builder) (ptr provider)
+-- | Specify a font manager for loading animation fonts.
+setFontManager :: (MonadIO m) => AnimationBuilder -> SkFontMgr -> m ()
+setFontManager (ptr -> builder) (ptr -> fontManager) = liftIO do
+  [C.block| void {
+    $(skottie::Animation::Builder* builder)->setFontManager(
+      sk_sp<SkFontMgr>($(SkFontMgr* fontManager))
+    );
+  }|]
 
-setFontManager :: (MonadIO m) => SkottieAnimationBuilder -> SKFontManager -> m ()
-setFontManager builder fmgr = evalManaged do
-  liftIO $ skottie_animation_builder_set_font_manager (ptr builder) (ptr fmgr)
+-- * Animation factories
 
+-- | Builds an animation from a stream containing the JSON data.
 buildFromStream ::
-  (MonadResource m, IsSKStream stream) =>
-  SkottieAnimationBuilder ->
+  (MonadResource m, IsSkStream stream) =>
+  AnimationBuilder ->
+  -- | The stream containing the JSON data.
   stream ->
-  m (Maybe (ReleaseKey, SkottieAnimation))
-buildFromStream builder (toA SKStream -> stream) =
-  allocateSKObjectOrNothingIfNull
-    (skottie_animation_builder_make_from_stream (ptr builder) (ptr stream))
-    skottie_animation_unref
+  m (Maybe (ReleaseKey, Animation))
+buildFromStream (ptr -> builder) (ptr . toA SkStream -> stream) =
+  allocateSkObjectOrNothingIfNull
+    [C.exp| skottie::Animation* {
+      $(skottie::Animation::Builder* builder)->make($(SkStream* stream)).release()
+    }|]
+    (\p -> [C.block| void { delete $(skottie::Animation* p); } |])
 
+-- | Builds an animation from a 'ByteString' containing the JSON data.
 buildFromByteString ::
   (MonadResource m) =>
-  SkottieAnimationBuilder ->
+  AnimationBuilder ->
+  -- | The JSON data.
   BS.ByteString ->
-  m (Maybe (ReleaseKey, SkottieAnimation))
-buildFromByteString builder bytestring =
-  allocateSKObjectOrNothingIfNull
-    ( evalManaged do
-        (cstr, len) <- managed $ BS.unsafeUseAsCStringLen bytestring
-        liftIO $ skottie_animation_builder_make_from_data (ptr builder) cstr (fromIntegral len)
-    )
-    skottie_animation_unref
+  m (Maybe (ReleaseKey, Animation))
+buildFromByteString (ptr -> builder) bytestring =
+    allocateSkObjectOrNothingIfNull
+      ( evalManaged do
+          (cstr, fromIntegral -> len) <- storableByteStringLen bytestring
+          liftIO [C.exp| skottie::Animation* {
+            $(skottie::Animation::Builder* builder)->make(
+              $(const char* cstr),
+              $(size_t len)
+            ).release()
+          }|]
+      )
+      (\p -> [C.block| void { delete $(skottie::Animation* p); } |])
 
+-- | Builds an animation from a JSON file given its path.
 buildFromFile ::
   (MonadResource m) =>
-  SkottieAnimationBuilder ->
+  AnimationBuilder ->
+  -- | Path to the JSON file.
   FilePath ->
-  m (Maybe (ReleaseKey, SkottieAnimation))
-buildFromFile builder path =
-  allocateSKObjectOrNothingIfNull
+  m (Maybe (ReleaseKey, Animation))
+buildFromFile (ptr -> builder) path =
+  allocateSkObjectOrNothingIfNull
     ( evalManaged do
         path' <- managed $ Foreign.C.String.withCString path
-        liftIO $ skottie_animation_builder_make_from_file (ptr builder) path'
+        liftIO [C.exp| skottie::Animation* {
+          $(skottie::Animation::Builder* builder)->makeFromFile($(const char* path')).release()
+        }|]
     )
-    skottie_animation_unref
+    (\p -> [C.block| void { delete $(skottie::Animation* p); } |])

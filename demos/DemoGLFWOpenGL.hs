@@ -5,24 +5,25 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Resource
 import Data.Text qualified as T
-import Foreign.C
 import Graphics.GL qualified as GL
 import Graphics.UI.GLFW qualified as GLFW
 import Linear
-import Skia.Bindings
-import Skia.Color
-import Skia.Enums
-import Skia.GRBackendRenderTarget qualified as GRBackendRenderTarget
-import Skia.GRDirectContext qualified as GRDirectContext
-import Skia.GRGlInterface qualified as GRGlInterface
+import Skia.SkColor
+import Skia.GrBackendRenderTarget qualified as GrBackendRenderTarget
+import Skia.GrContextOptions qualified as GrContextOptions
+import Skia.GrDirectContext qualified as GrDirectContext
+import Skia.GrGLInterface qualified as GrGLInterface
+import Skia.GrGLTypes
+import Skia.GrTypes
 import Skia.Objects
-import Skia.Rect
-import Skia.SKCanvas qualified as SKCanvas
-import Skia.SKFont qualified as SKFont
-import Skia.SKFontManager qualified as SKFontManager
-import Skia.SKFontStyle qualified as SKFontStyle
-import Skia.SKPaint qualified as SKPaint
-import Skia.SKSurface qualified as SKSurface
+import Skia.SkRect
+import Skia.SkCanvas qualified as SkCanvas
+import Skia.SkColorType
+import Skia.SkFont qualified as SkFont
+import Skia.SkFontMgr qualified as SkFontMgr
+import Skia.SkFontStyle qualified as SkFontStyle
+import Skia.SkPaint qualified as SkPaint
+import Skia.SkSurface qualified as SkSurface
 import System.Exit
 import System.IO
 
@@ -43,27 +44,26 @@ kWidth, kHeight :: Int
 kWidth = 960
 kHeight = 640
 
-initSkia :: (MonadResource m) => Int -> Int -> m (GRDirectContext, SKSurface)
+initSkia :: (MonadResource m) => Int -> Int -> m (GrDirectContext, SkSurface)
 initSkia w h = do
-  (_, interface) <- GRGlInterface.createNativeInterface
-  (_, context) <- GRDirectContext.createGl interface Nothing
+  (_, interface) <- GrGLInterface.createNativeInterface
+  (_, context) <- GrDirectContext.makeGL interface GrContextOptions.defaultOptions
 
-  let fbinfo =
-        Gr_gl_framebufferinfo
-          { fFBOID = 0
-          , fFormat = CUInt GL.GL_RGBA8
-          , fProtected = 0
-          }
-  (_, target) <- GRBackendRenderTarget.createGl w h 0 0 fbinfo
-  isvalid <- GRBackendRenderTarget.isValid target
+  let
+    fbinfo = GrGLFramebufferInfo
+      { fboId = 0
+      , format = GL.GL_RGBA8
+      }
+  (_, target) <- GrBackendRenderTarget.makeGL w h 0 0 fbinfo
+  isvalid <- GrBackendRenderTarget.isValid target
   unless isvalid $ error "GL backend render target is not valid"
 
   (_, surface) <-
-    SKSurface.wrapBackendRenderTarget
+    SkSurface.wrapBackendRenderTarget
       context
       target
-      GRSurfaceOrigin'BottomLeft
-      SKColorType'RGBA'8888
+      GrSurfaceOrigin'BottomLeft
+      SkColorType'RGBA'8888
       Nothing
       Nothing
   pure (context, surface)
@@ -94,17 +94,17 @@ main = do
   GLFW.swapInterval 0 -- This makes the canvas refresh faster and more responsive.
   runResourceT do
     -- Setup font for drawing text.
-    (_, fontmgr) <- SKFontManager.createByFontconfig
-    Just (_, typeface) <- SKFontManager.matchFamilyStyle fontmgr Nothing SKFontStyle.style'Normal
+    (_, fontmgr) <- SkFontMgr.createByFontconfig
+    Just (_, typeface) <- SkFontMgr.matchFamilyStyle fontmgr Nothing SkFontStyle.style'Normal
 
-    (_, font) <- SKFont.createEmpty
-    SKFont.setTypeface font (Just typeface)
-    SKFont.setSize font 48
-    SKFont.setSkewX font (-0.5)
+    (_, font) <- SkFont.createDefault
+    SkFont.setTypeface font (Just typeface)
+    SkFont.setSize font 48
+    SkFont.setSkewX font (-0.5)
 
     -- Setup context, surface, and canvas.
     (context, surface) <- initSkia kWidth kHeight
-    (_, canvas) <- SKSurface.getCanvas surface
+    (_, canvas) <- SkSurface.getCanvas surface
 
     fix \continue -> do
       shouldClose <- liftIO $ GLFW.windowShouldClose window
@@ -112,13 +112,13 @@ main = do
         liftIO $ GLFW.waitEvents
         (x, y) <- liftIO $ GLFW.getCursorPos window
 
-        -- Nest another ResourceT to isolate SKObjects related to drawing
+        -- Nest another ResourceT to isolate SkObjects related to drawing
         runResourceT do
-          (_, paint) <- SKPaint.create
+          (_, paint) <- SkPaint.create
 
           -- Clear background to white
-          SKPaint.setColorRGBA paint (RGBA 1 1 1 1) Nothing
-          SKCanvas.drawPaint canvas paint
+          SkPaint.setColorRGBA paint (RGBA 1 1 1 1) Nothing
+          SkCanvas.drawPaint canvas paint
 
           -- Draw a blue rectangle for testing
           let rect =
@@ -128,12 +128,12 @@ main = do
                   , right = 300
                   , bottom = 500
                   }
-          SKPaint.setColorRGBA paint (RGBA 0 0 1 1) Nothing
-          SKCanvas.drawRect canvas rect paint
+          SkPaint.setColorRGBA paint (RGBA 0 0 1 1) Nothing
+          SkCanvas.drawRect canvas rect paint
 
           -- Draw text
-          SKPaint.setColorRGBA paint (RGBA 0 0 0 1) Nothing
-          SKCanvas.drawSimpleText
+          SkPaint.setColorRGBA paint (RGBA 0 0 0 1) Nothing
+          SkCanvas.drawSimpleText
             canvas
             (T.pack $ "Mouse = " <> show (x, y))
             (fmap realToFrac $ V2 x y)
@@ -142,7 +142,7 @@ main = do
 
         -- The previous draw operations/commands must be flushed before
         -- GLFW.swapBuffers, otherwise you see nothing.
-        GRDirectContext.flush context
+        GrDirectContext.flush context
         liftIO $ GLFW.swapBuffers window
 
         continue

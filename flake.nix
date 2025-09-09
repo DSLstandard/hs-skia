@@ -23,12 +23,6 @@
           hPkgs.fourmolu
           hPkgs.haskell-language-server
           hPkgs.hpack
-
-          # For working with cbits/ and cbits_cmake/
-          pkgs.clang
-          pkgs.pkg-config
-          pkgs.cmake 
-          pkgs.ninja
         ];
 
         libDeps = with pkgs; [
@@ -59,11 +53,9 @@
         ];
 
         pyDeps = [
-            pkgs.python312
+          pkgs.python312
         ] ++ (with pkgs.python311Packages; [
-            pycparser
-            pytest
-            pyyaml
+          # No Python dependencies
         ]);
       in {
         devShells.default = pkgs.mkShell {

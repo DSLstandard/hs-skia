@@ -1,17 +1,9 @@
-{- | Importing this module automatically imports other commonly used modules.
-This is a helper module for quickly importing a bunch utilities for developing
-Skia function bindings with. This module should only be used by this Haskell
-library.
--}
 module Skia.Internal.Prelude (
-  -- * Skia core module reexports.
   module Skia.Core,
-  module Skia.Enums,
-  module Skia.Errors,
   module Skia.Internal.CoreUtils,
   module Skia.Internal.Utils,
-  module Skia.Linear,
   module Skia.Objects,
+  module Skia.Errors,
 
   -- * Common utils reexports.
   module Control.Exception,
@@ -32,15 +24,11 @@ module Skia.Internal.Prelude (
   module Linear,
 ) where
 
--- NOTE: Beware of accidential cyclic imports.
-
 import Skia.Core
-import Skia.Enums
-import Skia.Errors
 import Skia.Internal.CoreUtils
 import Skia.Internal.Utils
-import Skia.Linear
 import Skia.Objects
+import Skia.Errors
 
 import Control.Exception
 import Control.Monad
