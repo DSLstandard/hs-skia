@@ -42,7 +42,6 @@ library
       Skia.GrTypes
       Skia.Internal.CoreUtils
       Skia.Internal.Prelude
-      Skia.Internal.RawEnums
       Skia.Internal.THUtils
       Skia.Internal.TypeLevelBool
       Skia.Internal.Utils
