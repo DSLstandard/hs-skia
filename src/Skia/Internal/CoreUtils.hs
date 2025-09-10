@@ -18,6 +18,15 @@ import GHC.Stack
 import Control.Monad
 #endif
 
+-- | Set to 'True' if @enable-skia-assertions@ is enabled.
+isHsSkiaAssertionsEnabled :: Bool
+isHsSkiaAssertionsEnabled =
+#ifdef HS_SKIA_SKIA_ASSERTIONS_ENABLED
+  True
+#else
+  False
+#endif
+
 -- | Acquires an SkObject by acquiring its pointer.
 --
 -- The acquired pointer is assumed to never be null.

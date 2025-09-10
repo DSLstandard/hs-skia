@@ -13,7 +13,7 @@ C.context $
 
 C.include "core/SkPathTypes.h"
 
-$( qGenerateSkEnum "Direction"
+$( qGenerateSkEnum "SkPathDirection"
   [trimming|
     Represents direction for adding closed contours to paths.
   |]
@@ -22,18 +22,7 @@ $( qGenerateSkEnum "Direction"
   ]
  )
 
-$( qGenerateSkEnum "SegmentMask"
-  [trimming|
-    Mask values for different path segment types.
-  |]
-  [("Line", "SkPathSegmentMask::kLine_SkPathSegmentMask", "line segment mask (1 << 0)")
-  ,("Quad", "SkPathSegmentMask::kQuad_SkPathSegmentMask", "quadratic segment mask (1 << 1)")
-  ,("Conic", "SkPathSegmentMask::kConic_SkPathSegmentMask", "conic segment mask (1 << 2)")
-  ,("Cubic", "SkPathSegmentMask::kCubic_SkPathSegmentMask", "cubic segment mask (1 << 3)")
-  ]
- )
-
-$( qGenerateSkEnum "Verb"
+$( qGenerateSkEnum "SkPathVerb"
   [trimming|
     Verb types that can appear in a path.
     Each verb indicates what follows it in the point array.
@@ -48,7 +37,7 @@ $( qGenerateSkEnum "Verb"
  )
 
 
-$( qGenerateSkEnum "FillType"
+$( qGenerateSkEnum "SkPathFillType"
   [trimming|
     Specifies how to compute the interior of a path.
   |]
